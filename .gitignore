@@ -1,0 +1,4 @@
+classifier/data/
+classifier/models/
+db/
+__pycache__/

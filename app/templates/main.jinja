@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Spam classifier{% endblock %}
+{% block head %}
+    {{ super() }}
+    <script type=text/javascript>
+        $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script type=text/javascript>
+    $(function() {
+        $(":button#calculate").bind("click", function() {
+            $.getJSON($SCRIPT_ROOT + "/get_spam", {
+                spamSliderVal: $("input[name='spamSlider']").val()
+            }, function(data) {
+                $("#result").html(data.email_text);
+            });
+            return false;
+        });
+    });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div class="slidecontainer">
+    <input type="range" min="1" max="100" value="50" class="form-control-range" name="spamSlider">
+    </div>
+
+    <button type="button" class="btn btn-primary" value="Get Email!" id="calculate">My Button</button>
+    <br>
+    <span id=result>
+<!-- 
+    {% if email_text %}
+    {{ email_text.replace("\n", "<br>") |safe }}
+    {% endif %}
+    </span>
+    -->
+    </span>
+{% endblock %}
