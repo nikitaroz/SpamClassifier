@@ -11,17 +11,10 @@ app = Flask(__name__)
 
 @app.route('/')
 def main():
-<<<<<<< HEAD
-#    db_connector = sqlite3.connect("db/spam.db")
-#    cursor = db_connector.cursor()
-#    email_text = cursor.execute("SELECT text FROM messages where ID=1").fetchall()[0][0]
-    return render_template("main.jinja", subject="", body="")
-=======
     #db_connector = sqlite3.connect("db/spam.db")
     #cursor = db_connector.cursor()
     #email_text = cursor.execute("SELECT text FROM messages where ID=1").fetchall()[0][0]
     return render_template("main.jinja")#, email_text=email_text)
->>>>>>> 8f18afe934b972cbbebf5d6719840330bbb3593b
 
 @app.route("/get_spam")
 def get_spam():
