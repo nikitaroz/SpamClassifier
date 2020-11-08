@@ -22,13 +22,17 @@
 {% endblock %}
 
 {% block content %}
-    <div class="slidecontainer">
-    <input type="range" min="1" max="100" value="50" class="form-control-range" name="spamSlider">
-    </div>
+    <main role="main" class="container">
+        <div class="slidecontainer">
+        <input type="range" min="1" max="100" value="50" class="form-control-range" name="spamSlider">
+        </div>
 
-    <button type="button" class="btn btn-primary" value="Get Email!" id="calculate">My Button</button>
-    <br>
-    <span class="font-weight-bold" id="subject"></span>
-    <br>
-    <span id="body"></span>
+        <button type="button" class="btn btn-primary" value="Get Email!" id="calculate">My Button</button>
+        <br>
+        <div class="container m-3 p-3 bg-light" id="result">
+            <span class="font-weight-bold" id="subject"></span>
+            <br>
+            <span id="body"></span>
+        </div>
+    <main>
 {% endblock %}
