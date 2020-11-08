@@ -11,10 +11,10 @@ app = Flask(__name__)
 
 @app.route('/')
 def main():
-    db_connector = sqlite3.connect("db/spam.db")
-    cursor = db_connector.cursor()
-    email_text = cursor.execute("SELECT text FROM messages where ID=1").fetchall()[0][0]
-    return render_template("main.jinja", email_text=email_text)
+    #db_connector = sqlite3.connect("db/spam.db")
+    #cursor = db_connector.cursor()
+    #email_text = cursor.execute("SELECT text FROM messages where ID=1").fetchall()[0][0]
+    return render_template("main.jinja")#, email_text=email_text)
 
 @app.route("/get_spam")
 def get_spam():
@@ -23,9 +23,8 @@ def get_spam():
     conn = sqlite3.connect("db/spam.db")
     cursor = conn.cursor()
     email_text = cursor.execute(f"SELECT text FROM messages where ID={spam_slider_val}").fetchall()[0][0]
-
+    conn.close()
     return jsonify(email_text = email_text.replace("\n", "<br>"))
-
 
 
 @app.route("/about")
