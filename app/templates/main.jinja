@@ -12,7 +12,8 @@
             $.getJSON($SCRIPT_ROOT + "/get_spam", {
                 spamSliderVal: $("input[name='spamSlider']").val()
             }, function(data) {
-                $("#result").html(data.email_text);
+                $("#body").html(data.body);
+                $("#subject").html(data.subject);
             });
             return false;
         });
@@ -27,12 +28,7 @@
 
     <button type="button" class="btn btn-primary" value="Get Email!" id="calculate">My Button</button>
     <br>
-    <span id=result>
-<!-- 
-    {% if email_text %}
-    {{ email_text.replace("\n", "<br>") |safe }}
-    {% endif %}
-    </span>
-    -->
-    </span>
+    <span class="font-weight-bold" id="subject"></span>
+    <br>
+    <span id="body"></span>
 {% endblock %}

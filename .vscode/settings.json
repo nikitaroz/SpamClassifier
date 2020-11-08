@@ -1,4 +1,6 @@
 {
     "python.linting.pylintUseMinimalCheckers": false,
-    "python.formatting.provider": "black"
+    "python.formatting.provider": "black",
+    "python.pythonPath": "/Users/nikita/anaconda3/bin/python",
+    "python.dataScience.jupyterServerURI": "local"
 }

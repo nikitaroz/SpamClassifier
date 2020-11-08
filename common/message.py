@@ -7,7 +7,7 @@ import numpy as np
 
 # import pandas as pd
 import spacy
-import unidecode
+#import unidecode
 
 from bs4 import BeautifulSoup
 
@@ -22,11 +22,22 @@ nlp = spacy.load("en_core_web_sm", disable=["tagger", "parser", "ner", "textcat"
 
 class Message:
     def __init__(
-        self, mailparser_obj: mailparser.mailparser, label, special_chars="!?*$%#*{[("
+        self, mailparser_obj: mailparser.MailParser, label, special_chars="!?*$%#*{[("
     ):
         self.mailparser_obj = mailparser_obj
         self.label = label
-        self.text = self.mailparser_obj.body
+        message_body = mailparser_obj.body
+        if re.match(r"<\/?[a-zA-Z]*>", message_body) is not None:
+        #    self.body_has_html = True
+            soup = BeautifulSoup(message_body, "html.parser")
+        #    for link in soup.find_all("a", href=True):
+        #        for token in urlparse(link["href"]).netloc.split("."):
+        #            body_urls.append(token)
+
+            message_body = soup.get_text(separator=" ")
+
+        self.text = message_body
+        self.subject = self.mailparser_obj.headers.get("Subject", "")
         # TODO: do not make these class attributes
         self.body_cap_max = 0
         self.body_cap_pct = 0
@@ -61,8 +72,8 @@ class Message:
         return features
 
     def _fix_unicode(self, text):
-        cleaned_text = ftfy.fix_text(text)
-        return unidecode.unidecode(cleaned_text)
+        return ftfy.fix_text(text)
+        #return unidecode.unidecode(cleaned_text)
 
     def _extract_body_features(self):
         message_subject = self.mailparser_obj.headers.get("Subject")
@@ -118,7 +129,7 @@ class Message:
                     body_tokens.append(fragment)
 
             elif token.like_email:
-                for match in re.finditer(r"[^@]+$", fragment.text):
+                for match in re.finditer(r"[^@]+$", token.text):
                     body_tokens.append(match.group())
 
         self.body_tokens = " ".join(body_tokens)
