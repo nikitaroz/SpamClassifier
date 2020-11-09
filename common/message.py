@@ -7,6 +7,8 @@ import numpy as np
 
 # import pandas as pd
 import spacy
+from spacy.tokenizer import Tokenizer
+from spacy.util import compile_prefix_regex, compile_infix_regex, compile_suffix_regex
 #import unidecode
 
 from bs4 import BeautifulSoup
@@ -17,7 +19,23 @@ from bs4 import BeautifulSoup
 # from sklearn.pipeline import Pipeline
 # from sklearn.preprocessing import StandardScaler
 
+# https://stackoverflow.com/questions/56439423/spacy-parenthesis-tokenization-pairs-of-lrb-rrb-not-tokenized-correctly
+def custom_tokenizer(nlp):
+    infixes = tuple([r"\b\)\b"]) + nlp.Defaults.infixes
+    infix_re = compile_infix_regex(infixes)
+    prefix_re = compile_prefix_regex(nlp.Defaults.prefixes)
+    suffix_re = compile_suffix_regex(nlp.Defaults.suffixes)
+    return Tokenizer(
+        nlp.vocab,
+        prefix_search=prefix_re.search,
+        suffix_search=suffix_re.search,
+        infix_finditer=infix_re.finditer,
+        token_match=None
+    )
+
 nlp = spacy.load("en_core_web_sm", disable=["tagger", "parser", "ner", "textcat"])
+nlp.tokenizer = custom_tokenizer(nlp)
+
 
 
 class Message:
@@ -26,18 +44,11 @@ class Message:
     ):
         self.mailparser_obj = mailparser_obj
         self.label = label
-        message_body = mailparser_obj.body
-        if re.match(r"<\/?[a-zA-Z]*>", message_body) is not None:
-        #    self.body_has_html = True
-            soup = BeautifulSoup(message_body, "html.parser")
-        #    for link in soup.find_all("a", href=True):
-        #        for token in urlparse(link["href"]).netloc.split("."):
-        #            body_urls.append(token)
+        message_text = mailparser_obj.body
 
-            message_body = soup.get_text(separator=" ")
-
-        self.text = message_body
-        self.subject = self.mailparser_obj.headers.get("Subject", "")
+        self.text = message_text
+        self.subject_text = self.mailparser_obj.headers.get("Subject", "")
+        self.body_text = self.mailparser_obj.body
         # TODO: do not make these class attributes
         self.body_cap_max = 0
         self.body_cap_pct = 0
@@ -71,49 +82,60 @@ class Message:
             features.update({f"body_ch{char}_pct": pct})
         return features
 
-    def _fix_unicode(self, text):
+    def _normalize_unicode(self, text):
         return ftfy.fix_text(text)
         #return unidecode.unidecode(cleaned_text)
 
+    def _normalize_html(self, text):
+
+        if re.search(r"<\/?[a-zA-Z]*>", text) is not None:
+            soup = BeautifulSoup(text, "html.parser")
+            for a_tag in soup.find_all("a", href=True):
+                if a_tag.string is None:
+                    a_tag.string = a_tag.get("href")
+                else:
+                    a_tag.string = a_tag.string + " " + a_tag.get("href")
+            normalized_text = soup.get_text(separator=" ")
+        else:
+            normalized_text = text
+        return normalized_text
+
+
+        
+
     def _extract_body_features(self):
-        message_subject = self.mailparser_obj.headers.get("Subject")
-        if message_subject is None:
-            message_subject = ""
-        message_body = message_subject + "\n" + self.mailparser_obj.body
+        message_subject = self.mailparser_obj.headers.get("Subject", "")
+        #message_body = self.mailparser_obj.body
 
-        body_urls = []
-        if re.match(r"<\/?[a-zA-Z]*>", message_body) is not None:
-            self.body_has_html = True
-            soup = BeautifulSoup(message_body, "html.parser")
-            for link in soup.find_all("a", href=True):
-                for token in urlparse(link["href"]).netloc.split("."):
-                    body_urls.append(token)
+        message_subject = self._normalize_unicode(message_subject)
+        self.body_text = self._normalize_unicode(self.body_text)
+        self.body_text = self._normalize_html(self.body_text)
+        self.body_text = re.sub(r"^\s*[\n]{2,}", r"\n\n", self.body_text)
+        message_text = self.body_text + "\n" + self.mailparser_obj.body
 
-            message_body = soup.get_text(separator=" ")
-
-        body_char_len = len(message_body)
+        body_char_len = len(message_text)
         if body_char_len == 0:
             return None
 
         num_non_ascii = 0
-        for char in message_body:
+        for char in message_text:
             if ord(char) > 128:
                 num_non_ascii += 1
 
         self.body_nonascii_pct = num_non_ascii / body_char_len
-        message_body = self._fix_unicode(message_body)
+        #message_text = self._fix_unicode(message_text)
         for char in self.special_chars:
             self.body_special_char_pct.update(
-                {f"ch{char}": message_body.count(char) / body_char_len}
+                {f"ch{char}": message_text.count(char) / body_char_len}
             )
 
         self.body_cap_max, self.body_cap_pct = self._count_capital_sequences(
-            message_body
+            message_text
         )
 
-        message_body = re.sub(r"[-\[\]{}()<>#$^&*_+=|\\'\"]", " ", message_body)
+        message_text = re.sub(r"[-\[\]{}()<>#$^&*_+=|\\'\"]", " ", message_text)
 
-        body_nlp = nlp(message_body)
+        body_nlp = nlp(message_text)
         body_tokens = []
         # body_emails = []
         for token in body_nlp:

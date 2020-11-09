@@ -10,7 +10,7 @@ class DatabasePopulator:
         cursor = conn.cursor()
         rows = []
         for message in messages:
-            rows.append((message.label, message.subject, message.text))
+            rows.append((message.label, message.subject_text, message.body_text))
 
         cursor.executemany("INSERT INTO messages(label, subject, body) values (?, ?, ?)", rows)
         conn.commit()
