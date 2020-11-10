@@ -1,5 +1,5 @@
 
 
-class Token:
-    def __init__(self, document_id):
+class Feature:
+    def __init__(self, feature, coefficient, color=None):
         raise NotImplementedError

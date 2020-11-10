@@ -10,6 +10,15 @@ import spacy
 from spacy.tokenizer import Tokenizer
 from spacy.util import compile_prefix_regex, compile_infix_regex, compile_suffix_regex
 
+import matplotlib as mpl 
+import matplotlib.cm as cm
+
+norm = mpl.colors.Normalize(vmin=-20, vmax=20)
+cmap = cm.get_cmap("coolwarm")
+
+m = cm.ScalarMappable(norm=norm, cmap=cmap)
+
+
 def custom_tokenizer(nlp):
     infixes = nlp.Defaults.infixes + tuple([r"\b[\[\(]\b"]) 
     infix_re = compile_infix_regex(infixes)
@@ -50,21 +59,22 @@ def get_spam():
     tokens = []
     conn = sqlite3.connect("db/spam.db")
     cursor = conn.cursor()
+    # TODO: don't query if common word, etc...
+    # TODO: grouped query possible here???
+    # TODO: this should use the classmethod from Message
     for token in nlp(body):
         result = cursor.execute("SELECT coefficient FROM features WHERE feature == ?", (token.text,)).fetchone()
         if result is not None:
-            print(result)
-            cmap_idx = int(256 / (10*result[0]) - 25.6)
-            if cmap_idx < 0:
-                cmap_idx = 0
-            elif cmap_idx > 255:
-                cmap_idx = 255
-            color = to_hex(cmap.colors[cmap_idx])
+            #print(result)
+            color = to_hex(m.to_rgba(result[0]))
+            #print(m.to_rgba(result))
+
             tokens.append(f"<mark style='background-color:{color};'>" + token.text + "</mark>")
         else:
             tokens.append(token.text)
-    
-    tokens = " ".join(tokens)
+        if token.whitespace_:
+            tokens.append(token.whitespace_)
+    tokens = "".join(tokens)
     
     
     body = body.replace("\n", "<br>")

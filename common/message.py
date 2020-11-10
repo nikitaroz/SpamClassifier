@@ -40,10 +40,10 @@ nlp.tokenizer = custom_tokenizer(nlp)
 
 class Message:
     def __init__(
-        self, mailparser_obj: mailparser.MailParser, label, special_chars="!?*$%#*{[("
+        self, mailparser_obj: mailparser.MailParser, special_chars="!?*$%#*{[("
     ):
         self.mailparser_obj = mailparser_obj
-        self.label = label
+        #self.label = label
         message_text = mailparser_obj.body
 
         self.text = message_text
@@ -110,8 +110,8 @@ class Message:
         message_subject = self._normalize_unicode(message_subject)
         self.body_text = self._normalize_unicode(self.body_text)
         self.body_text = self._normalize_html(self.body_text)
-        self.body_text = re.sub(r"^\s*[\n]{2,}", r"\n\n", self.body_text)
-        message_text = self.body_text + "\n" + self.mailparser_obj.body
+        self.body_text = re.sub(r"(?:\s*\n\s*){2,}", r"\n\n", self.body_text)
+        message_text = message_subject + "\n" + self.body_text
 
         body_char_len = len(message_text)
         if body_char_len == 0:
