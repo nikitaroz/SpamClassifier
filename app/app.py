@@ -22,7 +22,7 @@ m = cm.ScalarMappable(norm=norm, cmap=cmap)
 
 
 def custom_tokenizer(nlp):
-    infixes = nlp.Defaults.infixes + tuple([r"\b[\[\(]\b"]) 
+    infixes = nlp.Defaults.infixes + [r"\b[\[\(]\b"]
     infix_re = compile_infix_regex(infixes)
     prefix_re = compile_prefix_regex(nlp.Defaults.prefixes)
     suffix_re = compile_suffix_regex(nlp.Defaults.suffixes)
@@ -52,7 +52,6 @@ def get_email():
     cursor = conn.cursor()
 
     subject, body = cursor.execute(f"SELECT subject, body FROM messages where message_id={value}").fetchone()
-    cmap = sns.color_palette("viridis", as_cmap=True)
     
     tokens = []
     conn = sqlite3.connect("db/spam.db")
@@ -63,10 +62,7 @@ def get_email():
     for token in nlp(body):
         result = cursor.execute("SELECT coefficient FROM features WHERE feature == ?", (token.lemma_,)).fetchone()
         if result is not None:
-            #print(result)
             color = to_hex(m.to_rgba(result[0]))
-
-
             tokens.append(f"<mark style='background-color:{color};'>" + token.text + "</mark>")
         else:
             tokens.append(token.text)
@@ -85,8 +81,12 @@ def search():
     #TODO: validate input
     if request.method == "GET":
         search_term = request.args.get("q", "")
-    
-    return render_template("search.html")
+        conn = sqlite3.connect("db/spam.db")
+        cursor = conn.cursor()
+        results = cursor.execute(f"SELECT subject, body FROM fts_idx WHERE fts_idx MATCH ? ORDER BY rank", (search_term,)).fetchmany(5)
+    #for i, result in enumerate(results):
+    #    results[i][1] = result[1].replace("\n", " ")
+    return render_template("search.html", results=results)
 
 @app.route("/about")
 def about_page():

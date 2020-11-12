@@ -21,7 +21,7 @@ from bs4 import BeautifulSoup
 
 # https://stackoverflow.com/questions/56439423/spacy-parenthesis-tokenization-pairs-of-lrb-rrb-not-tokenized-correctly
 def custom_tokenizer(nlp):
-    infixes = tuple([r"\b\)\b"]) + nlp.Defaults.infixes
+    infixes = [r"\b\)\b"] + nlp.Defaults.infixes
     infix_re = compile_infix_regex(infixes)
     prefix_re = compile_prefix_regex(nlp.Defaults.prefixes)
     suffix_re = compile_suffix_regex(nlp.Defaults.suffixes)

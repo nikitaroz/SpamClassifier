@@ -2,9 +2,15 @@
 
 {% block content %}
 <div>
-    <br>
-    <br>
-    <br>
-    <h1> Searched here</h1>
+    <h1> Search results</h1>
+    {% for result in results %}
+        <b>{{ result[0] }}</b>
+        {% if result[1]|length < 200 %}
+            {{ result[1] }}
+        {% else %}
+            {{ result[1][:200] }}
+        {% endif %}
+        <br>
+    {% endfor %}
 </div>
 {% endblock %}

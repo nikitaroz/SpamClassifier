@@ -1,7 +1,10 @@
 {
     "python.linting.pylintUseMinimalCheckers": false,
     "python.formatting.provider": "black",
-    "python.pythonPath": "C:\\Users\\Nikita\\miniconda3\\python.exe",
-    "python.dataScience.jupyterServerURI": "local",
-    "python.linting.pylintArgs": ["--disable", "C0114,C0115,C0116"]
+    "python.pythonPath": "/Users/nikita/anaconda3/bin/python",
+    "python.linting.pylintArgs": [
+        "--disable",
+        "C0114,C0115,C0116"
+    ],
+    "jupyter.jupyterServerType": "local"
 }
