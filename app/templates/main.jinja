@@ -8,10 +8,9 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script type=text/javascript>
     $(function() {
-        $(":button#calculate").bind("click", function() {
-            $.getJSON($SCRIPT_ROOT + "/get_spam", {
-                spamSliderVal: $("input[name='spamSlider']").val()
-            }, function(data) {
+        $(":button#get_email").bind("click", function() {
+            $.getJSON($SCRIPT_ROOT + "/get_email", {}, 
+            function(data) {
                 $("#body").html(data.body);
                 $("#subject").html(data.subject);
                 $("#tokens").html(data.tokens);
@@ -22,20 +21,20 @@
     </script>
 {% endblock %}
 
+<!-- TODO: fix this -->
 {% block content %}
-    <main role="main" class="container">
-        <div class="slidecontainer">
-        <input type="range" min="1" max="100" value="50" class="form-control-range" name="spamSlider">
+<div class="container-fluid">
+    <div class="row flex-xl-nowrap">
+        <div class="col-12 col-md-3 col-xl-2">
+            <button type="button" class="btn btn-primary" value="Get Email!" id="get_email">My Button</button>
         </div>
-
-        <button type="button" class="btn btn-primary" value="Get Email!" id="calculate">My Button</button>
-        <br>
-        <div class="container m-3 p-3 bg-light" id="result">
-            <span class="font-weight-bold" id="subject"></span>
-            <br>
-            <span id="body"></span>
-            <br>
-            <span id="tokens"></span>
+        <div class="col-12 col-md-9 col-xl-10 py-md-3 pl-md-5">
+            <div class="container m-3 p-3 bg-light" id="result">
+                <span class="font-weight-bold" id="subject"></span>
+                <br>
+                <span id="body"></span>
+            </div>
         </div>
-    <main>
+    </div>
+</div>
 {% endblock %}

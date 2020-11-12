@@ -35,6 +35,3 @@ class DatabasePopulator:
             cursor.executemany("INSERT INTO features (feature, coefficient) values (?, ?)", features)
         conn.commit()
         conn.close()
-        
-
-
