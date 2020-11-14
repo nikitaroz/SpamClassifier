@@ -3,8 +3,7 @@ CREATE TABLE IF NOT EXISTS messages (
     message_id INTEGER PRIMARY KEY,
     label TINYINT NOT NULL,
     subject TEXT NOT NULL,
-    body TEXT NOT NULL,
-    formatted_body TEXT
+    body TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS features (
@@ -23,13 +22,13 @@ CREATE VIRTUAL TABLE IF NOT EXISTS fts_idx USING fts5 (
 );
 
 -- Triggers to keep the FTS index up to date.
-CREATE TRIGGER messages_ai AFTER INSERT ON messages BEGIN
+CREATE TRIGGER IF NOT EXISTS messages_ai AFTER INSERT ON messages BEGIN
   INSERT INTO fts_idx(rowid, subject, body) VALUES (new.message_id, new.subject, new.body);
 END;
-CREATE TRIGGER messages_ad AFTER DELETE ON messages BEGIN
+CREATE TRIGGER IF NOT EXISTS messages_ad AFTER DELETE ON messages BEGIN
   INSERT INTO fts_idx(fts_idx, rowid, subject, body) VALUES('delete', old.message_id, old.subject, old.body);
 END;
-CREATE TRIGGER messages_au AFTER UPDATE ON messages BEGIN
+CREATE TRIGGER IF NOT EXISTS messages_au AFTER UPDATE ON messages BEGIN
   INSERT INTO fts_idx(fts_idx, rowid, subject, body) VALUES('delete', old.message_id, old.subject, old.body);
   INSERT INTO fts_idx(rowid, subject, body) VALUES (new.message_id, new.subject, new.body);
 END;
