@@ -1,47 +1,41 @@
 import re
 
 import ftfy
-import mailparser
+#import mailparser
 import numpy as np
-import spacy
 from bs4 import BeautifulSoup
 from matplotlib.cm import ScalarMappable, get_cmap
 from matplotlib.colors import Normalize, to_hex
-
-# pylint: disable=no-name-in-module
-from spacy.tokenizer import Tokenizer
-from spacy.util import compile_infix_regex, compile_prefix_regex, compile_suffix_regex
-
-
-# https://spacy.io/usage/linguistic-features#native-tokenizers
-# https://stackoverflow.com/questions/56439423/spacy-parenthesis-tokenization-pairs-of-lrb-rrb-not-tokenized-correctly
-def custom_tokenizer(nlp_):
-    infixes = [r"\b\)\b", r"\b\(\b"] + nlp_.Defaults.infixes
-    infix_re = compile_infix_regex(infixes)
-    prefix_re = compile_prefix_regex(nlp_.Defaults.prefixes)
-    suffix_re = compile_suffix_regex(nlp_.Defaults.suffixes)
-    return Tokenizer(
-        nlp_.vocab,
-        prefix_search=prefix_re.search,
-        suffix_search=suffix_re.search,
-        infix_finditer=infix_re.finditer,
-        token_match=None,
-    )
+from nltk.corpus import stopwords, words
+from nltk.stem import PorterStemmer
+from nltk.tokenize import TweetTokenizer
 
 
-nlp = spacy.load("en_core_web_sm", disable=["tagger", "parser", "ner", "textcat"])
-nlp.tokenizer = custom_tokenizer(nlp)
+STEMMER = PorterStemmer()
+
+WORDS = set(STEMMER.stem(w) for w in words.words())
+STOPWORDS = set(STEMMER.stem(w) for w in stopwords.words("english"))
 
 
 class Message:
-    def __init__(
-        self, parser: mailparser.MailParser, tokenizer=spacy.load("en_core_web_sm")
-    ):
+    def __init__(self, parser: str):
+        
         self.parser = parser
         self._body = ftfy.fix_text(self.parser.body)
         self._subject = ftfy.fix_text(parser.headers.get("Subject", ""))
 
-        self.tokenizer = tokenizer
+        self._tokenizer = TweetTokenizer()
+        self._stemmer = STEMMER
+        self._words = WORDS
+        self._stopwords = STOPWORDS
+
+    @property
+    def tokenizer(self):
+        return self._tokenizer
+
+    @property
+    def stemmer(self):
+        return self._stemmer
 
     @property
     def body(self):
@@ -84,6 +78,7 @@ class Message:
 
         return features
 
+    # TODO: apparently this does not actually remove html
     def _normalize_text(self, text):
         if re.search(r"<\/?[a-zA-Z]*>", text) is not None:
             soup = BeautifulSoup(text, "html.parser")
@@ -104,26 +99,20 @@ class Message:
         text = self.subject + "\n\n" + self.body
         normalized_text = self._normalize_text(text)
 
-        doc = self.tokenizer(normalized_text)
-        filtered_tokens = []
-        # TODO: further cleaning is needed here
-        for token in doc:
-            if (
-                token.is_space
-                or token.is_digit
-                or token.is_stop
-                or token.is_punct
-            ):
-                continue
-            else:
-                filtered_tokens.append(token.lemma_.lower())
+        tokens = self.tokenizer.tokenize(normalized_text)
+        stems = [self.stemmer.stem(t).lower() for t in tokens]
+        filtered_tokens = [
+            t for t in stems if t in self._words and t not in self._stopwords
+        ]
         return " ".join(filtered_tokens)
 
     def subject_html(self, db_connector=None, scalar_map=None):
-        return self._get_html(self.subject, db_connector, scalar_map)
+        subject = self._normalize_text(self.subject)
+        return self._get_html(subject, db_connector, scalar_map)
 
     def body_html(self, db_connector=None, scalar_map=None):
-        return self._get_html(self.body, db_connector, scalar_map)
+        body = self._normalize_text(self.body)
+        return self._get_html(body, db_connector, scalar_map)
 
     def _get_html(self, text, db_connector, scalar_map):
         tokens = []
@@ -131,33 +120,39 @@ class Message:
             norm = Normalize(vmin=-20, vmax=20)
             cmap = get_cmap("coolwarm")
             scalar_map = ScalarMappable(norm=norm, cmap=cmap)
-        for token in self.tokenizer(text):
-            if (
-                token.is_space
-                or token.is_digit
-                or token.is_stop
-                or token.is_punct
-                or token.is_digit
-            ):
-                tokens.append(token.text + token.whitespace_)
-            elif token.text == "\n":
-                tokens.append("<br>")
-            else:
-                if db_connector is not None:
-                    coef = db_connector.cursor.execute(
-                        "SELECT coefficient FROM features WHERE feature == ?",
-                        (token.lemma_,),
-                    ).fetchone()
-                    if coef is not None:
-                        color = to_hex(scalar_map.to_rgba(coef[0]))
-                        tokens.append(
-                            f"<mark style='background-color:{color};'>"
-                            + token.text
-                            + "</mark>"
-                            + token.whitespace_
-                        )
+        cursor = 0
+        text_len = len(text)
+        for token in self.tokenizer.tokenize(text):
+            size = len(token)
+            while True:
+                if text[cursor : cursor + size] == token:
+                    stem = self.stemmer.stem(token)
+                    if db_connector is not None:
+                        coef = db_connector.cursor.execute(
+                            "SELECT coefficient FROM features WHERE feature == ?",
+                            (stem,),
+                        ).fetchone()
+                        if coef is not None:
+                            color = to_hex(scalar_map.to_rgba(coef[0]))
+                            tokens.append(
+                                f"<mark style='background-color:{color};'>"
+                                + token
+                                + "</mark>"
+                            )
+                        else:
+                            tokens.append(token)
                     else:
-                        tokens.append(token.text + token.whitespace_)
+                        tokens.append(token)
+                    cursor += size
+                    break
+                else:
+                    if text_len == cursor:
+                        break
+                    elif text[cursor] == "\n":
+                        tokens.append("<br>")
+                    else:
+                        tokens.append(text[cursor])
+                    cursor += 1
 
         tokens = "".join(tokens)
         return tokens

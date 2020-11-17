@@ -1,5 +1,6 @@
 import sqlite3
-
+from .message import Message
+import mailparser
 
 class DatabaseConnector:
     def __init__(self, database):
@@ -24,8 +25,12 @@ class DatabaseConnector:
         self.connection.executescript(open(schema).read())
 
     def populate_message_table(self, messages, labels, commit=False):
+        
+
         rows = []
         for i, message in enumerate(messages):
+            if isinstance(message, str):
+                message = Message(mailparser.parse_from_file(message))
             rows.append((labels[i], message.subject_html(db_connector=self), message.body_html(db_connector=self)))
 
         self.cursor.executemany(

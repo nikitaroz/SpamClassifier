@@ -9,7 +9,7 @@ from common.database_connector import DatabaseConnector
 from flask import Flask, jsonify, render_template, request
 from numpy.random import randint
 
-db = DatabaseConnector("db/spam.db")
+db = DatabaseConnector("../db/spam.db")
 app = Flask(__name__)
 
 
@@ -21,7 +21,7 @@ def main():
 @app.route("/get_email")
 def get_email():
 
-    value = randint(0, 10)
+    value = randint(1, 10)
     subject, body = db.cursor.execute(
         "SELECT subject, body FROM messages where message_id=?", (value,)
     ).fetchone()
@@ -35,11 +35,14 @@ def search():
     # TODO: validate input
     if request.method == "GET":
         search_term = request.args.get("q", "")
-        results = db.cursor.execute(
-            "SELECT subject, body FROM fts_idx WHERE fts_idx MATCH ? ORDER BY rank",
-            (search_term,),
-        ).fetchmany(5)
-    return render_template("search.jinja", results=results)
+        if search_term != "":
+            results = db.cursor.execute(
+                "SELECT snippet(fts_idx, 0, '<b>', '</b>', '', 20), " + \
+                "snippet(fts_idx, 1, '<b>', '</b>', '', 50) " + \
+                "FROM fts_idx WHERE fts_idx MATCH ? ORDER BY rank",
+                (search_term,),
+            ).fetchmany(5)
+            return render_template("search.jinja", results=results)
 
 
 @app.route("/about")
