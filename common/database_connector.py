@@ -1,9 +1,12 @@
 import sqlite3
+
 from .message import Message
-import mailparser
+
 
 class DatabaseConnector:
-    def __init__(self, database):
+    def __init__(self, database, pipeline, classifier):
+        self._pipeline = pipeline
+        self._classifier = classifier
         self._conn = sqlite3.connect(database, check_same_thread=False)
         self._cursor = self._conn.cursor()
 
@@ -25,32 +28,50 @@ class DatabaseConnector:
         self.connection.executescript(open(schema).read())
 
     def populate_message_table(self, messages, labels, commit=False):
-        
-
         rows = []
         for i, message in enumerate(messages):
-            if isinstance(message, str):
-                message = Message(mailparser.parse_from_file(message))
-            rows.append((labels[i], message.subject_html(db_connector=self), message.body_html(db_connector=self)))
-
+            if not isinstance(message, Message):
+                try:
+                    message = Message(message)
+                except OSError:
+                    continue
+            features = message.text_features()
+            if self._pipeline is not None and self._classifier is not None:
+                x = self._pipeline.transform([message])
+                prob_spam = self._classifier.predict_proba(x)[:, 1]
+            else:
+                prob_spam = None
+            # TODO: probability of spam is not correctly added to database
+            rows.append(
+                (
+                    labels[i],
+                    features["cap_max"],
+                    features["cap_pct"],
+                    features["num_links"],
+                    features["has_html"],
+                    features["nonascii_pct"],
+                    prob_spam,
+                    message.subject_html(db_connector=self),
+                    message.body_html(db_connector=self),
+                ),
+            )
         self.cursor.executemany(
-            "INSERT INTO messages(label, subject, body) values (?, ?, ?)", rows
+            "INSERT INTO messages(label, cap_max, cap_pct, num_links, has_html, " + \
+                "nonascii_pct, prob_spam, subject, body) values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            rows,
         )
         if commit:
             self.connection.commit()
 
-    def populate_feature_table(self, features, commit=False):
+    def populate_feature_table(self, commit=False):
+        features = []
+        coefs = self._classifier.coef_
+        vectorizer = self._pipeline["vectorizer"].named_transformers_["tdidf_body_vectorizer"]
+        for e in zip(vectorizer.get_feature_names(), coefs):
+                features.append(e)
 
-        has_color = bool(len(features[0]) == 3)
-
-        if has_color:
-            self.cursor.executemany(
-                "INSERT INTO features(feature, coefficient, color) values (?, ?, ?)",
-                features,
-            )
-        else:
-            self.cursor.executemany(
+        self.cursor.executemany(
                 "INSERT INTO features (feature, coefficient) values (?, ?)", features
-            )
+        )
         if commit:
             self.connection.commit()

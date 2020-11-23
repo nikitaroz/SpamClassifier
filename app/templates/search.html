@@ -1,4 +1,4 @@
-{% extends "base.jinja" %}
+{% extends "base.html" %}
 
 {% block content %}
 <div class="container-fluid">
@@ -7,10 +7,10 @@
             <h1> Search results</h1>
             {% for result in results %}
                 <div class="container m-3 p-3 bg-light">
-                    <b>{{ result[0] }}</b>
-                    {{ result[1] }}
-                    <br>
+                    <b>{{ result[0]|safe }}</b>
+                    {{ result[1]|safe }}
                 </div>
+                <hr class="solid">
             {% endfor %}
         </div>
     </div>

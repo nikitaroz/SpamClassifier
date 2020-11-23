@@ -2,6 +2,12 @@
 CREATE TABLE IF NOT EXISTS messages (
     message_id INTEGER PRIMARY KEY,
     label TINYINT NOT NULL,
+    cap_max INTEGER,
+    cap_pct FLOAT,
+    num_links INTEGER,
+    has_html TINYINT,
+    nonascii_pct FLOAT,
+    prob_spam FLOAT,
     subject TEXT NOT NULL,
     body TEXT NOT NULL
 );
@@ -9,8 +15,7 @@ CREATE TABLE IF NOT EXISTS messages (
 CREATE TABLE IF NOT EXISTS features (
     feature_id INTEGER PRIMARY KEY,
     feature VARCHAR(10) NOT NULL,
-    coefficient FLOAT NOT NULL,
-    color VARCHAR(8)
+    coefficient FLOAT NOT NULL
 );
 
 -- Create an external content fts5 table to index messages.

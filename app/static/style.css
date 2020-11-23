@@ -1,6 +1,33 @@
 
 /* Show it is fixed to the top */
+
 body {
   min-height: 75rem;
   padding-top: 4.5rem;
+}
+
+mark {
+  padding: 0.1em 0.2em;
+  border-radius: 5px;
+  box-shadow: 0.2px 0.2px rgb(119, 119, 119);
+}
+
+#result {
+  font-family: 'Quicksand', sans-serif;
+  height: 30em;
+  overflow: hidden;
+}
+
+.fadeout {
+  position: relative;
+  height: 10em;
+  bottom: 10em;
+  width: 100%;
+  background: linear-gradient(rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 100%);
+}
+
+#result
+
+hr.solid {
+  border-top: 3px solid rgba(61, 58, 58, 1.0);
 }

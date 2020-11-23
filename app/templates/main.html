@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Spam classifier{% endblock %}
+{% block head %}
+    {{ super() }}
+    <script type=text/javascript>
+        $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://d3js.org/d3-color.v2.min.js"></script>
+    <script src="https://d3js.org/d3-interpolate.v2.min.js"></script>
+    <script src="https://d3js.org/d3-scale-chromatic.v2.min.js"></script>
+
+
+
+    <script type=text/javascript>
+        $(function() {
+            $(":button#get_email").bind("click", function() {
+                $.getJSON($SCRIPT_ROOT + "/get_email", {}, 
+                function(data) {
+                    var truncated_body = data.body.split("<br>")
+                    $(".fadeout").remove();
+                    if (truncated_body.length > 18) {
+                        truncated_body = truncated_body.slice(0, 18).join("<br>")
+                        $("#body").html(truncated_body);
+                        $("#body").after("<div class='fadeout'></div>");
+                    } else {
+                        $("#body").html(data.body);
+                    }
+                    
+                    $("#subject").html(data.subject);
+                    $("#tokens").html(data.tokens);
+                    $("mark").each( function() {
+                        var value = $(this).data("value");
+                        var color = d3.interpolateRdYlGn((-value + 100) / 200);
+                        $(this).css('background-color', color);
+                        var tooltip = "Value: " + value;
+                        
+                        $(this).attr("data-toggle", "tooltip");
+                        $(this).attr("title", tooltip);
+                        $(this).tooltip();
+                    });
+                });
+            return false;
+            })
+        })
+    </script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row flex-xl-nowrap">
+        <div class="col-12 col-md-3 col-xl-2 bg-dark">
+            <button type="button" class="btn btn-primary" value="Get Email!" id="get_email">My Button</button>
+        </div>
+        <div class="col-12 col-md-9 col-xl-10 py-md-3 pl-md-5">
+            <div class="container m-3 p-3 bg-light" id="result">
+                <span class="font-weight-bold" id="subject"></span>
+                <br>
+                <span id="body"></span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -6,9 +6,8 @@ from .message import Message
 
 
 class MessageTransformer(BaseEstimator, TransformerMixin):
-    def __init__(self, input="message"):
+    def __init__(self):
         """string {‘filename’, ‘file’, ‘content’}, """
-        self.input = input
         self.messages = []
 
     def fit(self, X, y=None):
@@ -19,18 +18,17 @@ class MessageTransformer(BaseEstimator, TransformerMixin):
         feature_aggregator = []
         if isinstance(X, str):
             raise ValueError("Must be a list or iterable, not a string")
+        
         for x in X:
-            if self.input == "content":
-                mailparser_obj = mailparser.parse_from_string(x)
-            elif self.input == "file":
-                mailparser_obj = mailparser.parse_from_file_obj(x)
-            elif self.input == "filename":
-                mailparser_obj = mailparser.parse_from_file(x)
-            elif self.input == "message":
-                feature_aggregator.append((x.tokens(),))
-                continue
+            if isinstance(x, Message):
+                message = x
             else:
-                raise ValueError("Input must be: file, filename, or message")
-            feature_aggregator.append((Message(mailparser_obj).tokens(),))
+                try:
+                    message = Message(x)
+                except OSError:
+                    print(f"had an error on {x}. Replacing with empty.")
+                    message = Message(" ")
+                    
+            feature_aggregator.append({**{"tokens": message.tokens()}, **message.text_features()})
 
-        return pd.DataFrame.from_records(feature_aggregator, columns=("tokens",))
+        return pd.DataFrame.from_records(feature_aggregator) 

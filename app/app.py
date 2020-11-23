@@ -9,19 +9,20 @@ from common.database_connector import DatabaseConnector
 from flask import Flask, jsonify, render_template, request
 from numpy.random import randint
 
-db = DatabaseConnector("../db/spam.db")
+db = DatabaseConnector("../db/spam.db", None, None)
 app = Flask(__name__)
+app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 
 @app.route("/")
 def main():
-    return render_template("main.jinja")
+    return render_template("main.html")
 
 
 @app.route("/get_email")
 def get_email():
 
-    value = randint(1, 10)
+    value = randint(1, 100)
     subject, body = db.cursor.execute(
         "SELECT subject, body FROM messages where message_id=?", (value,)
     ).fetchone()
@@ -37,17 +38,16 @@ def search():
         search_term = request.args.get("q", "")
         if search_term != "":
             results = db.cursor.execute(
-                "SELECT snippet(fts_idx, 0, '<b>', '</b>', '', 20), " + \
-                "snippet(fts_idx, 1, '<b>', '</b>', '', 50) " + \
-                "FROM fts_idx WHERE fts_idx MATCH ? ORDER BY rank",
+                "SELECT highlight(fts_idx, 0, '<b>', '</b>'), " + \
+                "highlight(fts_idx, 1, '<b>', '</b>') " + \
+                "FROM fts_idx WHERE fts_idx MATCH ? ORDER BY rank;",
                 (search_term,),
             ).fetchmany(5)
-            return render_template("search.jinja", results=results)
-
+            return render_template("search.html", results=results)
 
 @app.route("/about")
 def about_page():
-    return render_template("about.jinja")
+    return render_template("about.html")
 
 
 if __name__ == "__main__":

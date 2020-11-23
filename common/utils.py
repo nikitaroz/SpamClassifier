@@ -10,14 +10,6 @@ from bs4 import BeautifulSoup
 BASE_DATA_URL = "http://spamassassin.apache.org/old/publiccorpus/"
 DATA_DIR = "data"
 
-# TODO TODO
-# TODO: how do we define these using directory resolution???
-def create_database_schema(schema, database):
-    conn = sqlite3.connect(database)
-    cursor = conn.cursor()
-    cursor.execute(schema)
-    conn.close()
-
 def get_data_urls(base_url=BASE_DATA_URL):
     data_urls = []
     with urlopen(base_url) as response:
