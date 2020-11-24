@@ -10,6 +10,11 @@ mark {
   padding: 0.1em 0.2em;
   border-radius: 5px;
   box-shadow: 0.2px 0.2px rgb(119, 119, 119);
+  cursor: pointer;
+}
+
+mark:hover {
+  box-shadow: 0.5px 0.5px rgb(119, 119, 119);
 }
 
 #result {
@@ -19,14 +24,11 @@ mark {
 }
 
 .fadeout {
-  position: relative;
-  height: 10em;
-  bottom: 10em;
-  width: 100%;
-  background: linear-gradient(rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 100%);
+  position: absolute;
+  height: 5em;
+  bottom: 0em;
+  background: linear-gradient(rgba(248, 249, 250, 0) 0%, rgba(248, 249, 250, 1.0) 90%);
 }
-
-#result
 
 hr.solid {
   border-top: 3px solid rgba(61, 58, 58, 1.0);
