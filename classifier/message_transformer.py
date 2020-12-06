@@ -1,8 +1,7 @@
-import mailparser
 import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
 
-from .message import Message
+from message import Message
 
 
 class MessageTransformer(BaseEstimator, TransformerMixin):

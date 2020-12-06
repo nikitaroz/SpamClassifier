@@ -1,7 +1,7 @@
-classifier/data/
-classifier/models/
-db/
+data/
+results/
 __pycache__/
 .DS_Store
-.pkl
-.vscode
+*.egg-info
+instance/
+.ipynb_checkpoints/

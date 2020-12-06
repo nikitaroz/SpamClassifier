@@ -1,4 +1,3 @@
-import sqlite3
 import tarfile
 from urllib.request import urlopen, urlretrieve
 from os import mkdir, listdir
@@ -8,7 +7,6 @@ from tempfile import gettempdir
 from bs4 import BeautifulSoup
 
 BASE_DATA_URL = "http://spamassassin.apache.org/old/publiccorpus/"
-DATA_DIR = "data"
 
 def get_data_urls(base_url=BASE_DATA_URL):
     data_urls = []
@@ -21,7 +19,7 @@ def get_data_urls(base_url=BASE_DATA_URL):
                 data_urls.append((href, join(BASE_DATA_URL, href)))
     return data_urls
 
-def fetch_data(data_urls, data_dir=DATA_DIR):
+def fetch_data(data_urls, data_dir):
     temp_dir = gettempdir()
     if not exists(data_dir):
         mkdir(data_dir)
@@ -36,7 +34,7 @@ def fetch_data(data_urls, data_dir=DATA_DIR):
                 tar.extract(name, path=data_dir)
         tar.close()
 
-def get_labeled_files(data_dir=DATA_DIR):
+def get_labeled_files(data_dir):
     data_files = []
     class_labels = []
     for dir_ in listdir(data_dir):

@@ -1,6 +1,6 @@
 import sqlite3
 
-from .message import Message
+from message import Message
 
 
 class DatabaseConnector:
@@ -38,10 +38,9 @@ class DatabaseConnector:
             features = message.text_features()
             if self._pipeline is not None and self._classifier is not None:
                 x = self._pipeline.transform([message])
-                prob_spam = self._classifier.predict_proba(x)[:, 1]
+                prob_spam = float(self._classifier.predict_proba(x)[0, 1])
             else:
                 prob_spam = None
-            # TODO: probability of spam is not correctly added to database
             rows.append(
                 (
                     labels[i],

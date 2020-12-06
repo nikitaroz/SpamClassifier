@@ -25,13 +25,12 @@
     <script type=text/javascript>
         $(function() {
             $(":button#get_email").bind("click", function() {
-                jQuery.post($SCRIPT_ROOT + "/get_email", {
+                $.post($SCRIPT_ROOT + "/get_email", {
                     sliderMin: $("#slider-range").slider("values", 0),
                     sliderMax: $("#slider-range").slider("values", 1),
-                    hasNormal: $("input[name='hasNormal']").val(),
-                    hasSpam: $("input[name='hasSpam']").val()
-                }, 
-                function(data) {
+                    hasNormal: $("input[name='hasNormal']:checked").val(),
+                    hasSpam: $("input[name='hasSpam']:checked").val()
+                }, function(data) {
                     var truncated_body = data.body.split("<br>")
                     if (truncated_body.length > 20) {
                         truncated_body = truncated_body.slice(0, 20).join("<br>")
@@ -67,9 +66,9 @@
 <div class="container-fluid">
     <div class="row flex-xl-nowrap">
         <div class="col-12 col-md-3 col-xl-2 bg-dark">
-            <input type="checkbox" id="normal" name="hasNormal" value="normal" checked>
+            <input type="checkbox" id="normal" name="hasNormal" checked>
                 <label for="normal" class="text-light">Normal</label>
-            <input type="checkbox" id="spam" name="hasSpam" value="spam" checked>
+            <input type="checkbox" id="spam" name="hasSpam" checked>
                 <label for="spam" class="text-light">Spam</label>
             <br>
             <div id="slider-range"></div>

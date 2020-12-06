@@ -1,15 +1,23 @@
 from os.path import exists
 import re
-
+import nltk
 import ftfy
 import mailparser
 from mailparser.mailparser import MailParser
 from bs4 import BeautifulSoup
-from matplotlib.cm import ScalarMappable, get_cmap
-from matplotlib.colors import Normalize, to_hex
 from nltk.corpus import stopwords, words
 from nltk.stem import PorterStemmer
 from nltk.tokenize import TweetTokenizer
+
+try:
+    nltk.data.find("corpora/words")
+except LookupError:
+    nltk.download("words")
+
+try:
+    nltk.data.find("corpora/stopwords")
+except LookupError:
+    nltk.download("stopwords")
 
 TOKENIZER = TweetTokenizer()
 STEMMER = PorterStemmer()
@@ -108,20 +116,16 @@ class Message:
         ]
         return " ".join(filtered_tokens)
 
-    def subject_html(self, db_connector=None, scalar_map=None):
+    def subject_html(self, db_connector=None):
         subject = self._normalize_text(self.subject)
-        return self._get_html(subject, db_connector, scalar_map)
+        return self._get_html(subject, db_connector)
 
-    def body_html(self, db_connector=None, scalar_map=None):
+    def body_html(self, db_connector=None):
         body = self._normalize_text(self.body)
-        return self._get_html(body, db_connector, scalar_map)
+        return self._get_html(body, db_connector)
 
-    def _get_html(self, text, db_connector, scalar_map):
+    def _get_html(self, text, db_connector):
         tokens = []
-        if scalar_map is None:
-            norm = Normalize(vmin=-20, vmax=20)
-            cmap = get_cmap("coolwarm")
-            scalar_map = ScalarMappable(norm=norm, cmap=cmap)
         cursor = 0
         text_len = len(text)
         for token in self.tokenizer.tokenize(text):
@@ -136,7 +140,6 @@ class Message:
                         ).fetchone()
                         if result is not None:
                             coef = result[0]
-                            color = to_hex(scalar_map.to_rgba(coef))
                             tokens.append(
                                 f"<mark data-value='{coef:.5}'>"
                                 + token
