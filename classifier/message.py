@@ -86,6 +86,7 @@ class Message:
                     num_nonascii += 1
             features["nonascii_pct"] = num_nonascii / char_len
 
+        # finds continuous lines of capital letters
         caps = re.finditer(r"[A-Z]{2,}.*?(?=(?:\W?[A-Z]?[a-z]|$))", self._normalized_text)
         cap_lengths = []
         for match in caps:

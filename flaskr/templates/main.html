@@ -2,11 +2,8 @@
 {% block title %}Spam classifier{% endblock %}
 {% block head %}
     {{ super() }}
-    <script type=text/javascript>
-        $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-    </script>
-    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <script src="https://d3js.org/d3-color.v2.min.js"></script>
     <script src="https://d3js.org/d3-interpolate.v2.min.js"></script>
     <script src="https://d3js.org/d3-scale-chromatic.v2.min.js"></script>
@@ -19,70 +16,68 @@
                 values: [0, 100],
             });
         });
-        
+        // TODO
+        /*
+        $( "#slider-range" ).each( function() {
+            var options = ["0%", "50%", "100%"];
+            for (var i = 0; i <= 2; i++) {
+                var el = $("<label>" + options[i] + "</label>");
+                $("#slider-range").append(el); 
+            }
+        });
+        */
     </script>
+    <script type="text/javascript" src="{{ url_for('static', filename='get_email.js') }}"></script>
 
-    <script type=text/javascript>
-        $(function() {
-            $(":button#get_email").bind("click", function() {
-                $.post($SCRIPT_ROOT + "/get_email", {
-                    sliderMin: $("#slider-range").slider("values", 0),
-                    sliderMax: $("#slider-range").slider("values", 1),
-                    hasNormal: $("input[name='hasNormal']:checked").val(),
-                    hasSpam: $("input[name='hasSpam']:checked").val()
-                }, function(data) {
-                    var truncated_body = data.body.split("<br>")
-                    if (truncated_body.length > 20) {
-                        truncated_body = truncated_body.slice(0, 20).join("<br>")
-                        $("#body").html(truncated_body);
-                        $(".fadeout").css("visibility", "visible");
-                    } else {
-                        $(".fadeout").css("visibility", "hidden");
-                        $("#body").html(data.body);
-                    }
-                    
-                    $("#subject").html(data.subject);
-                    $("mark").each( function() {
-                        var value = $(this).data("value");
-                        var color = d3.interpolateRdYlGn((-value + 100) / 200);
-                        $(this).css('background-color', color);
-                        var tooltip = "Value: " + value;
-                        
-                        $(this).attr("data-toggle", "tooltip");
-                        $(this).attr("title", tooltip);
-                        $(this).tooltip();
-                        $(this).click(function() {
-                            window.location.replace("/search?q=" + $(this).text().toLowerCase());
-                        });
-                    });
-                });
-            return false;
-            })
-        })
-    </script>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row flex-xl-nowrap">
-        <div class="col-12 col-md-3 col-xl-2 bg-dark">
-            <input type="checkbox" id="normal" name="hasNormal" checked>
-                <label for="normal" class="text-light">Normal</label>
-            <input type="checkbox" id="spam" name="hasSpam" checked>
-                <label for="spam" class="text-light">Spam</label>
+<div class="row" id="body-row">
+    <div id="sidebar-container" class="sidebar-expanded d-none d-md-block col-2 bg-dark">
+        <ul class="list-group sticky-top sticky-offset">
+            <small class="text-light">TYPE OF EMAIL</small>
+            <li>
+                <input type="checkbox" id="normal" name="hasNormal" checked>
+                    <label for="normal" class="text-light">Normal</label>
+                <input type="checkbox" id="spam" name="hasSpam" checked>
+                    <label for="spam" class="text-light">Spam</label>
+            </li>
+            <small class="text-light">PREDICTED PROBABILITY OF SPAM</small>
+            <li>
+                <div id="slider-range"></div>
+            </li>
+            <li>
+                <div class="d-flex justify-content-center">
+                    <button type="button" class="btn btn-primary" id="get_email">Get Email</button>
+                </div>
+            </li>
+        </ul>
+    </div>
+    <div class="col py-3">
+        <div class="container m-3 p-3 bg-light" id="results">
+            <span class="font-weight-bold" id="subject">
+                <h2 id="no-emails-header">Click the Get Email button to display emails.</h2>    
+            </span>
             <br>
-            <div id="slider-range"></div>
-            <br>
-            <button type="button" class="btn btn-primary" value="Get Email!" id="get_email">My Button</button>
-        </div>
-        <div class="col-12 col-md-9 col-xl-10 py-md-3 pl-md-5">
-            <div class="container m-3 p-3 bg-light" id="result">
-                <span class="font-weight-bold" id="subject"></span>
-                <br>
-                <span id="body"></span>
-                <!-- <div class="fadeout"></div> -->
-            </div>
+            <span id="body"></span>
         </div>
     </div>
 </div>
+
+{% raw %}
+<script type="text/template" id="simple-message-template">
+    <div id="simple-message-template">
+        <form action='item' method='GET'>
+            <button name='id' value={{ id }}>Get</button>
+        </form>
+        <span class="badge rounded-pill bg-primary">{{ label }}</span>
+        <br>
+        <span id class="subject-span font-weight-bold">{{{ subject }}}</span>
+        <br>
+        <span id="body-span">{{{ body }}}</span>
+        <br>
+    </div>
+</script>
+{% endraw %}
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/4.1.0/mustache.js"></script>
 {% endblock %}

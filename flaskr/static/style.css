@@ -2,8 +2,16 @@
 /* Show it is fixed to the top */
 
 body {
-  min-height: 75rem;
-  padding-top: 4.5rem;
+  padding-top: 56px;
+}
+
+#body-row {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.sticky-offset {
+  top: 56px;
 }
 
 mark {
@@ -23,6 +31,19 @@ mark:hover {
   overflow: hidden;
 }
 
+#sidebar-container {
+  min-height: 100vh;
+  padding: 0;
+}
+
+#sidebar-container li {
+  margin: auto;
+  padding-top: 5px;
+  padding-bottom: 10px;
+  width: 90%;
+  text-align: center;
+}
+
 .fadeout {
   position: absolute;
   height: 5em;
@@ -32,4 +53,13 @@ mark:hover {
 
 hr.solid {
   border-top: 3px solid rgba(61, 58, 58, 1.0);
+}
+
+.ui-slider-range.ui-widget-header {
+  background: lightsteelblue;
+}
+
+svg {
+  display: block;
+  margin: auto
 }

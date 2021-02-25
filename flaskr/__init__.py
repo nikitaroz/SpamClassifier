@@ -7,9 +7,8 @@ from flaskr.views import bp
 def create_app():
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
-        DATABASE="classifier/results/spam.db",
+        DATABASE="classifier/results/spam.db",   
     )
-    print(app.config["DATABASE"])
     try:
         os.makedirs(app.instance_path)
     except OSError:

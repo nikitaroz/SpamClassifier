@@ -7,5 +7,5 @@
     ],
     "git.ignoreLimitWarning": true,
     "jupyter.jupyterServerType": "local",
-    "python.pythonPath": "/Users/nikita/miniconda3/envs/spam/bin/python",
+    "python.pythonPath": "C:\\Users\\Nikita\\miniconda3\\python.exe",
 }

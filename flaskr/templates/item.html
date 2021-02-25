@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Message{% endblock %}
+{% block head %} {{ super() }} {% endblock %}
+
+{% block content %}
+    <div class="container col-12 m-3 p-3 bg-light" id="message">
+        <span class="font-weight-bold" id="subject">
+            {{ subject|safe }}
+        </span>
+        <br>
+        <span id="body">
+            {{ body|safe }}
+        </span>
+    </div>
+{% endblock %}
