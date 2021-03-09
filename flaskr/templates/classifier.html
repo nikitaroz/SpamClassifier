@@ -2,11 +2,6 @@
 
 {% block head %}
     {{ super() }}
-    <style>
-        svg text {
-            pointer-events: none;
-        }
-    </style>
     <script src="https://d3js.org/d3.v6.min.js"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='wordcloud.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='confusion_matrix.js') }}"></script>
@@ -17,8 +12,7 @@
 <div class="row" id="body-row">
     <div class="col py-3">
         <svg id="wordcloud" style="width: 700px; height: 700px"></svg>
-        <br>
-        <svg id="confusion" style="width: 700px; height: 700px"></svg>
+        <svg id="test-confusion" style="width: 700px; height: 700px"></svg>
     </div>
 </div>
 {% endblock %}

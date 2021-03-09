@@ -15,13 +15,14 @@ CREATE TABLE IF NOT EXISTS messages (
 CREATE TABLE IF NOT EXISTS features (
     feature_id INTEGER PRIMARY KEY,
     feature VARCHAR(10) NOT NULL,
-    coefficient FLOAT NOT NULL
+    coefficient FLOAT NOT NULL,
+    frequency INTEGER
 );
 
 -- Create an external content fts5 table to index messages.
 CREATE VIRTUAL TABLE IF NOT EXISTS fts_idx USING fts5 (
     subject, 
-    body, 
+    body,
     content='messages', 
     content_rowid='message_id'
 );

@@ -1,15 +1,17 @@
 {% extends 'base.html' %}
 {% block title %}Message{% endblock %}
-{% block head %} {{ super() }} {% endblock %}
+{% block head %} 
+    {{ super() }} 
+{% endblock %}
 
 {% block content %}
-    <div class="container col-12 m-3 p-3 bg-light" id="message">
-        <span class="font-weight-bold" id="subject">
-            {{ subject|safe }}
-        </span>
-        <br>
-        <span id="body">
-            {{ body|safe }}
-        </span>
-    </div>
+<div class="message-template p-3">
+    <div class="message-subject">{{ response["subject"]|safe }}</div>
+    <div class="message-body">{{ response["body"]|safe }}</div>
+</div>
+
+<script type="text/javascript" src="{{ url_for('static', filename='color_marks.js') }}"></script>
+<script type="text/javascript">
+    $(document).ready(colorMarks());
+</script>
 {% endblock %}

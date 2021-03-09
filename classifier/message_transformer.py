@@ -22,12 +22,8 @@ class MessageTransformer(BaseEstimator, TransformerMixin):
             if isinstance(x, Message):
                 message = x
             else:
-                try:
-                    message = Message(x)
-                except OSError:
-                    print(f"had an error on {x}. Replacing with empty.")
-                    message = Message(" ")
-                    
+                message = Message(x)
+
             feature_aggregator.append({**{"tokens": message.tokens()}, **message.text_features()})
 
         return pd.DataFrame.from_records(feature_aggregator) 

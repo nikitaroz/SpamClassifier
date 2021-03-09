@@ -1,12 +1,17 @@
 import sqlite3
 
+import numpy as np
+
 from message import Message
 
-
 class DatabaseConnector:
-    def __init__(self, database, pipeline, classifier):
+    def __init__(self, database, pipeline, classifier, messages):
         self._pipeline = pipeline
         self._classifier = classifier
+        self._messages = messages
+        for i, m in enumerate(self._messages):
+            if not isinstance(m, Message):
+                self._messages[i] = Message(m)
         self._conn = sqlite3.connect(database, check_same_thread=False)
         self._cursor = self._conn.cursor()
 
@@ -27,14 +32,9 @@ class DatabaseConnector:
     def populate_schema(self, schema):
         self.connection.executescript(open(schema).read())
 
-    def populate_message_table(self, messages, labels, commit=False):
+    def populate_message_table(self, labels, commit=False):
         rows = []
-        for i, message in enumerate(messages):
-            if not isinstance(message, Message):
-                try:
-                    message = Message(message)
-                except OSError:
-                    continue
+        for i, message in enumerate(self._messages):
             features = message.text_features()
             if self._pipeline is not None and self._classifier is not None:
                 x = self._pipeline.transform([message])
@@ -64,13 +64,16 @@ class DatabaseConnector:
 
     def populate_feature_table(self, commit=False):
         features = []
-        coefs = self._classifier.coef_
-        vectorizer = self._pipeline["vectorizer"].named_transformers_["tdidf_body_vectorizer"]
-        for e in zip(vectorizer.get_feature_names(), coefs):
-                features.append(e)
-
+        counter = self._pipeline.named_steps["vectorizer"].named_transformers_["tdidf_body_vectorizer"].named_steps["counter"]
+        coefs = self._classifier.coef_[:len(counter.get_feature_names())]
+        total_counts = np.zeros(len(counter.get_feature_names()))
+        for m in self._messages:
+            counts = counter.transform([m.tokens()])
+            total_counts += counts
+        for e in zip(counter.get_feature_names(), coefs, np.asarray(total_counts)[0, :]):
+            features.append(e)
         self.cursor.executemany(
-                "INSERT INTO features (feature, coefficient) values (?, ?)", features
+            "INSERT INTO features (feature, coefficient, frequency) values (?, ?, ?)", features
         )
         if commit:
             self.connection.commit()

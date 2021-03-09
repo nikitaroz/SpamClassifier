@@ -1,18 +1,38 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row flex-xl-nowrap">
-        <div class="col-12">
-            <h1> Search results</h1>
-            {% for result in results %}
-                <div class="container m-3 p-3 bg-light">
-                    <b>{{ result[0]|safe }}</b>
-                    {{ result[1]|safe }}
-                </div>
-                <hr class="solid">
-            {% endfor %}
-        </div>
+
+{% from "macros.html" import message_template with context %}
+<div class="flex-grow-1 m-2 p-0">
+    <div class="bg-light m-0 p-2 rounded h-100" id="result">
+        {% for message in response %}
+            {{ message_template(message) }}
+        {% endfor %}
     </div>
 </div>
+
+<script type="text/javascript" src="{{ url_for('static', filename='color_marks.js') }}"></script>
+<script type="text/javascript">
+    $(document).ready(
+        colorMarks()
+    )
+</script>
+
+<script type=text/javascript>
+$(document).scroll(function() {
+    if ($(window).scrollTop() + $(window).height() == $(document).height()) {
+        var params = (new URL(document.location)).searchParams;
+        $.post("/get_email", {
+                normal: params.get("normal"),
+                spam: params.get("spam"),
+                offset: $(".message-template").length,
+                q: params.get("q", ""),
+            }, function(response) {
+            $("#result").append(response);
+            colorMarks();
+        })
+    }
+})
+</script>
+
 {% endblock %}

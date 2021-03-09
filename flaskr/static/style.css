@@ -1,17 +1,32 @@
 
 /* Show it is fixed to the top */
 
-body {
-  padding-top: 56px;
+/*
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color:rgb(27, 27, 27);
+  }
 }
 
-#body-row {
-  margin-left: 0;
-  margin-right: 0;
+@media (prefers-color-scheme: light) {
+
+}*/
+
+body {
+  padding-top: 56px;
+ /* font-family: 'Quicksand', sans-serif; */
 }
 
 .sticky-offset {
   top: 56px;
+}
+
+.message-template {
+  max-width: 600px;
+}
+
+ul {
+  list-style-type: none;
 }
 
 mark {
@@ -25,18 +40,17 @@ mark:hover {
   box-shadow: 0.5px 0.5px rgb(119, 119, 119);
 }
 
+
 #result {
-  font-family: 'Quicksand', sans-serif;
   height: 30em;
   overflow: hidden;
 }
 
-#sidebar-container {
-  min-height: 100vh;
-  padding: 0;
+#sidebar ul {
+  width: 300px;
 }
 
-#sidebar-container li {
+#sidebar li {
   margin: auto;
   padding-top: 5px;
   padding-bottom: 10px;
@@ -62,4 +76,12 @@ hr.solid {
 svg {
   display: block;
   margin: auto
+}
+
+svg text {
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+  pointer-events: none;
 }

@@ -6,7 +6,7 @@ import mailparser
 from mailparser.mailparser import MailParser
 from bs4 import BeautifulSoup
 from nltk.corpus import stopwords, words
-from nltk.stem import PorterStemmer
+from nltk.stem import SnowballStemmer
 from nltk.tokenize import TweetTokenizer
 
 try:
@@ -20,7 +20,9 @@ except LookupError:
     nltk.download("stopwords")
 
 TOKENIZER = TweetTokenizer()
-STEMMER = PorterStemmer()
+# TODO: change this to from nltk.stem import WordNetLemmatizer so that
+# the words come out to meaninful stems
+STEMMER = SnowballStemmer("english")
 WORDS = set(STEMMER.stem(w) for w in words.words())
 STOPWORDS = set(STEMMER.stem(w) for w in stopwords.words("english"))
 
@@ -32,8 +34,6 @@ class Message:
             self._parser = mailparser.parse_from_file(message)
         elif isinstance(message, MailParser):
             self._parser = message
-        elif hasattr(message, "read"):
-            self._parser = mailparser.parse_from_file_obj(message)
         elif isinstance(message, str):
             self._parser = mailparser.parse_from_string(message)
         else:

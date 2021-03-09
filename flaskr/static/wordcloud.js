@@ -1,7 +1,10 @@
 $("document").ready(
     $.post("/get_top_features", {},
         function (data) {
-            var diameter = 700;
+            var svg_size = 700;
+            var edge_padding = 50;
+            var pack_size = svg_size - 2*edge_padding;
+
             var dataset = { "children": data };
 
             var cScale = d3.scaleSequential(
@@ -10,7 +13,7 @@ $("document").ready(
             );
 
             var bubble = d3.pack(dataset)
-                .size([diameter - 100, diameter - 100])
+                .size([pack_size, pack_size])
                 .padding(2);
 
             var svg = d3.select("#wordcloud");
@@ -26,7 +29,7 @@ $("document").ready(
                 .append("g")
                 .attr("class", "node")
                 .attr("transform", function (d) {
-                    return "translate(" + d.x + 100 + "," + d.y + 100 + ")";
+                    return "translate(" + (d.x + edge_padding) + "," + (d.y + edge_padding) + ")";
                 });
 
 
@@ -48,16 +51,16 @@ $("document").ready(
                     d3.select(this).style("stroke-width", "0")
                 })
                 .on("click", function (d) {
-                    var isSelected = !d3.select(this).classed("selected");
-                    svg.selectAll("circle").classed("selected", false);
+                    var isSelected = !d3.select(this.parentNode).classed("selected");
+                    svg.selectAll("g").classed("selected", false);
                     if (isSelected) {
-                        d3.select(this).classed("selected", true);
+                        d3.select(this.parentNode).classed("selected", true);
                     };
 
                     if (isSelected) {
-                        var sel_x = d3.select(".selected").datum().x;
-                        var sel_y = d3.select(".selected").datum().y;
-                        var sel_r = d3.select(".selected").datum().r;
+                        var sel_x = d3.select(".selected circle").datum().x;
+                        var sel_y = d3.select(".selected circle").datum().y;
+                        var sel_r = d3.select(".selected circle").datum().r;
 
                         d3.selectAll("g")
                             .transition()
@@ -73,30 +76,50 @@ $("document").ready(
                                     var new_x = d.x + 50 * x_dist;
                                     var new_y = d.y + 50 * y_dist;
                                 }
-                                return "translate(" + new_x + "," + new_y + ")";
+                                return "translate(" + (new_x + edge_padding) + "," + (new_y + edge_padding) + ")";
                             })
                         svg.selectAll("circle")
                             .attr("r", function (d) {
-                                if (d3.select(this).classed("selected")) {
+                                if (d3.select(this.parentNode).classed("selected")) {
                                     return d.r + 50;
                                 } else {
                                     return d.r;
                                 }
                             });
+                        svg.select(".selected text")
+                            .transition()
+                            .attr("font-size", "24")
+                            .attr("y", "-45");
+
+                        svg.select(".selected").append("text")
+                            .classed("expandText", true)
+                            .text("something")
+                            .style("text-anchor", "middle")
+                            .style("alignment-baseline", "middle")
+                            .attr("font-size", "8");
                     } else {
                         svg.selectAll("g")
                             .transition()
                             .attr("transform", function (d) {
-                                return "translate(" + d.x + "," + d.y + ")";
+                                return "translate(" + (d.x + edge_padding) + "," + (d.y + edge_padding) + ")";
                             });
+
+                        svg.selectAll("text")
+                            .transition()
+                            .attr("font-size", function (d) {
+                                return Math.floor(3 * d.r / (d.data.feature.length));
+                            })
+                            .attr("y", "0");
+                        
                         svg.selectAll("circle")
                             .attr("r", function (d) {
-                                if (d3.select(this).classed("selected")) {
+                                if (d3.select(this.parentNode).classed("selected")) {
                                     return d.r + 50;
                                 } else {
                                     return d.r;
                                 }
                             });
+                        svg.selectAll(".expandText").remove();
                     }
                 });
 
