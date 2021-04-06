@@ -4,7 +4,7 @@
 
 {% from "macros.html" import message_template with context %}
 <div class="flex-grow-1 m-2 p-0">
-    <div class="bg-light m-0 p-2 rounded h-100" id="result">
+    <div class="m-0 p-2 rounded h-100" id="result">
         {% for message in response %}
             {{ message_template(message) }}
         {% endfor %}
@@ -26,7 +26,9 @@ $(document).scroll(function() {
                 normal: params.get("normal"),
                 spam: params.get("spam"),
                 offset: $(".message-template").length,
-                q: params.get("q", ""),
+                q: params.get("q"),
+                "search-btn": params.get("search-btn"),
+                "random-btn": params.get("random-btn")
             }, function(response) {
             $("#result").append(response);
             colorMarks();

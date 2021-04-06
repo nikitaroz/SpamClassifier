@@ -1,13 +1,9 @@
 from time import sleep
-from flask import jsonify, render_template, request, redirect, json
+from flask import jsonify, render_template, request, json
 from flaskr.db import get_db
 from flask import Blueprint
 
 bp = Blueprint("main", __name__)
-
-# TODO: remove
-from numpy.random import randint
-
 
 @bp.route("/")
 def main():
@@ -87,10 +83,11 @@ def get_email():
 
         if rows is None:
             return None
+
         response = [
             {
                 "id": r["message_id"],
-                "label": r["label"],
+                "label": "Spam" if r["label"] == 1 else "Normal",
                 "subject": r["subject"],
                 "body": "<br>".join(r["body"].split("<br>")[:6]),
                 "prob_spam": int(r["prob_spam"] * 100),
@@ -111,7 +108,10 @@ def get_email():
         if len(labels) == 0:
             return ("", 204)
 
-        search_term = request.args.get("q", None)
+        if "search-btn" in request.args:
+            search_term = request.args.get("q", None)
+        else:
+            search_term = None
 
         response = fetch_emails(labels, 0, 5, search_term=search_term)
         if response is None:
@@ -125,7 +125,12 @@ def get_email():
         if request.form.get("spam", "off") == "on":
             labels.append(1)
 
-        search_term = request.form.get("q", "")
+        
+        if request.form.get("search-btn", "") != "":
+            search_term = request.args.get("q", None)
+        else:
+            search_term = None
+            
         offset = request.form.get("offset", 0)
         response = fetch_emails(
             labels, offset, 3, search_term=search_term
@@ -137,9 +142,17 @@ def get_email():
 @bp.route("/item/<int:id>")
 def item_page(id):
     cursor = get_db().cursor()
-    response = cursor.execute(
-        "SELECT subject, body FROM messages WHERE message_id=?", (id,)
+    row = cursor.execute(
+        "SELECT * FROM messages WHERE message_id=?", (id,)
     ).fetchone()
+
+    response = {
+        "subject": row["subject"],
+        "body": row["body"],
+        "label": "Spam" if row["label"] == 1 else "Normal",
+        "prob_spam": int(row["prob_spam"] * 100),
+    }
+
     return render_template("item.html", response=response)
 
 

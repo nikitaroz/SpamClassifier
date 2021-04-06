@@ -8,6 +8,14 @@ function colorMarks() {
         
         $(this).attr("data-toggle", "tooltip");
         $(this).attr("title", tooltip);
-        //$(this).tooltip();
+        $(this).tooltip();
     });
+    $(".label-badge").each( function() {
+        if(this.innerText == "Normal") {
+            $(this).addClass("bg-success");
+        } else {
+            $(this).addClass("bg-danger");
+        }
+    })
+
 }

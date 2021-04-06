@@ -5,13 +5,21 @@
 {% endblock %}
 
 {% block content %}
-<div class="message-template p-3">
-    <div class="message-subject">{{ response["subject"]|safe }}</div>
-    <div class="message-body">{{ response["body"]|safe }}</div>
+<div class="message-template bg-light p-3 mx-auto">
+    <div class="message-header d-flex">
+        <div class="container-fluid p-0 m-0 font-weight-bold">
+            <span class="label-badge badge rounded-pill">{{ response["label"] }}</span>
+            <span class="badge rounded-pill">{{ response["prob_spam"] }}% Probability Spam</span>
+        </div>
+    </div>
+    <div class="row-flex message-subject font-weight-bold">{{ response["subject"]|safe }}</div>
+    <div class="row-flex message-body">{{ response["body"]|safe }}</div>
 </div>
 
 <script type="text/javascript" src="{{ url_for('static', filename='color_marks.js') }}"></script>
 <script type="text/javascript">
-    $(document).ready(colorMarks());
+    $(document).ready(function() {
+        colorMarks();
+    });
 </script>
 {% endblock %}

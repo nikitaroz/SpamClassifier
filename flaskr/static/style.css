@@ -1,16 +1,4 @@
 
-/* Show it is fixed to the top */
-
-/*
-@media (prefers-color-scheme: dark) {
-  body {
-    background-color:rgb(27, 27, 27);
-  }
-}
-
-@media (prefers-color-scheme: light) {
-
-}*/
 
 body {
   padding-top: 56px;
@@ -33,7 +21,6 @@ mark {
   padding: 0.1em 0.2em;
   border-radius: 5px;
   box-shadow: 0.2px 0.2px rgb(119, 119, 119);
-  cursor: pointer;
 }
 
 mark:hover {
@@ -67,10 +54,6 @@ mark:hover {
 
 hr.solid {
   border-top: 3px solid rgba(61, 58, 58, 1.0);
-}
-
-.ui-slider-range.ui-widget-header {
-  background: lightsteelblue;
 }
 
 svg {
