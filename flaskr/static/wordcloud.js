@@ -6,12 +6,10 @@ $("document").ready(
             var pack_size = svg_size - 2*edge_padding;
 
             var dataset = { "children": data };
-
-            var cScale = d3.scaleSequential(
-                d3.extent(data, function (d) { return d.frequency; }),
-                d3.interpolateRdYlGn
-            );
-
+            
+            var max_abs_coef = d3.max(data.map(d => Math.abs(d.coefficient)));
+            var cScale = d3.scaleSequential(d3.interpolateRdYlGn)
+                .domain([-max_abs_coef, max_abs_coef]);
             var bubble = d3.pack(dataset)
                 .size([pack_size, pack_size])
                 .padding(2);
@@ -40,7 +38,7 @@ $("document").ready(
                     return d.r;
                 })
                 .style("fill", function (d) {
-                    return cScale(d.data.frequency);
+                    return cScale(- d.data.coefficient);
                 })
                 .style("stroke", "black")
                 .style("stroke-width", "0")
@@ -52,6 +50,8 @@ $("document").ready(
                 })
                 .on("click", function (d) {
                     var isSelected = !d3.select(this.parentNode).classed("selected");
+                    prevSelected = d3.select(".selected");
+                    
                     svg.selectAll("g").classed("selected", false);
                     if (isSelected) {
                         d3.select(this.parentNode).classed("selected", true);
@@ -90,26 +90,43 @@ $("document").ready(
                             .transition()
                             .attr("font-size", "24")
                             .attr("y", "-45");
+                        
+                        svg.select(".selected")
+                            .append("text")
+                            .attr("dy", "0em")
+                            .text(function(d) {
+                                return `Found in ${d.data.frequency} emails`;
+                            })
+                            .classed("expandText", true);
 
-                        svg.select(".selected").append("text")
-                            .classed("expandText", true)
-                            .text("something")
+                        svg.select(".selected")
+                            .append("text")
+                            .attr("dy", "1.2em")
+                            .text(function(d) {
+                                return `Coefficient: ${d.data.coefficient}`
+                            })
+                            .classed("expandText", true);
+
+                        svg.selectAll(".selected .expandText")
                             .style("text-anchor", "middle")
                             .style("alignment-baseline", "middle")
-                            .attr("font-size", "8");
+                            .attr("font-size", "12");
+
+
+                        prevSelected.selectAll(".expandText").remove();
+                        prevSelected.selectAll("text")
+                            .transition()
+                            .attr("font-size", function(d) {
+                                return Math.floor(3 * d.r / (d.data.feature.length));
+                            })
+                            .attr("y", "0")
+                        
                     } else {
                         svg.selectAll("g")
                             .transition()
                             .attr("transform", function (d) {
                                 return "translate(" + (d.x + edge_padding) + "," + (d.y + edge_padding) + ")";
                             });
-
-                        svg.selectAll("text")
-                            .transition()
-                            .attr("font-size", function (d) {
-                                return Math.floor(3 * d.r / (d.data.feature.length));
-                            })
-                            .attr("y", "0");
                         
                         svg.selectAll("circle")
                             .attr("r", function (d) {
@@ -120,6 +137,12 @@ $("document").ready(
                                 }
                             });
                         svg.selectAll(".expandText").remove();
+                        svg.selectAll("text")
+                            .transition()
+                            .attr("font-size", function (d) {
+                                return Math.floor(3 * d.r / (d.data.feature.length));
+                            })
+                            .attr("y", "0");
                     }
                 });
 

@@ -1,8 +1,6 @@
-
-
 body {
   padding-top: 56px;
- /* font-family: 'Quicksand', sans-serif; */
+  /* font-family: 'Quicksand', sans-serif; */
 }
 
 .sticky-offset {
@@ -11,6 +9,14 @@ body {
 
 .message-template {
   max-width: 600px;
+}
+
+.feature-template {
+  max-width: 600px;
+}
+
+.message-body {
+  overflow: hidden;
 }
 
 ul {
@@ -28,7 +34,7 @@ mark:hover {
 }
 
 
-#result {
+#emails {
   height: 30em;
   overflow: hidden;
 }
@@ -63,8 +69,8 @@ svg {
 
 svg text {
   -webkit-user-select: none;
-     -moz-user-select: none;
-      -ms-user-select: none;
-          user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
   pointer-events: none;
 }

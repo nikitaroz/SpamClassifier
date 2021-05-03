@@ -20,8 +20,7 @@ except LookupError:
     nltk.download("stopwords")
 
 TOKENIZER = TweetTokenizer()
-# TODO: change this to from nltk.stem import WordNetLemmatizer so that
-# the words come out to meaninful stems
+
 STEMMER = SnowballStemmer("english")
 WORDS = set(STEMMER.stem(w) for w in words.words())
 STOPWORDS = set(STEMMER.stem(w) for w in stopwords.words("english"))
@@ -29,7 +28,7 @@ STOPWORDS = set(STEMMER.stem(w) for w in stopwords.words("english"))
 
 class Message:
     def __init__(self, message):
-        
+
         if isinstance(message, str) and exists(message):
             self._parser = mailparser.parse_from_file(message)
         elif isinstance(message, MailParser):
@@ -76,7 +75,7 @@ class Message:
             features["has_html"] = True
 
         soup = BeautifulSoup(self.body, "html.parser")
-    
+
         features["num_links"] = len(soup.find_all("a", href=True))
         char_len = len(self._normalized_text)
         if char_len > 0:
@@ -87,7 +86,9 @@ class Message:
             features["nonascii_pct"] = num_nonascii / char_len
 
         # finds continuous lines of capital letters
-        caps = re.finditer(r"[A-Z]{2,}.*?(?=(?:\W?[A-Z]?[a-z]|$))", self._normalized_text)
+        caps = re.finditer(
+            r"[A-Z]{2,}.*?(?=(?:\W?[A-Z]?[a-z]|$))", self._normalized_text
+        )
         cap_lengths = []
         for match in caps:
             cap_lengths.append(len(match.group()))
@@ -109,7 +110,6 @@ class Message:
         return normalized_text
 
     def tokens(self):
-
         tokens = self.tokenizer.tokenize(self._normalized_text)
         stems = [self.stemmer.stem(t).lower() for t in tokens]
         filtered_tokens = [
@@ -142,9 +142,7 @@ class Message:
                         if result is not None:
                             coef = result[0]
                             tokens.append(
-                                f"<mark data-value='{coef:.5}'>"
-                                + token
-                                + "</mark>"
+                                f"<mark data-value='{coef:.5}'>" + token + "</mark>"
                             )
                         else:
                             tokens.append(token)

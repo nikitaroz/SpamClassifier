@@ -1,6 +1,6 @@
 
 {% from "macros.html" import message_template with context %}
 
-{% for message in response %}
+{% for message in response["emails"] %}
     {{ message_template(message) }}
 {% endfor %}

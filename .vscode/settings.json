@@ -1,11 +1,12 @@
 {
     "python.linting.pylintUseMinimalCheckers": false,
-    "python.formatting.provider": "black",
+    "python.formatting.provider": "yapf",
     "python.linting.pylintArgs": [
         "--disable",
         "C0114,C0115,C0116"
     ],
     "git.ignoreLimitWarning": true,
     "jupyter.jupyterServerType": "local",
-    "python.pythonPath": "C:\\Users\\Nikita\\miniconda3\\python.exe",
+    "python.pythonPath": "/Users/nikita/miniconda3/envs/spam/bin/python",
+    "cSpell.enabled": false,
 }

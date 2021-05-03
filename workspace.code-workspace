@@ -9,6 +9,9 @@
 		"files.associations": {
 			"*.html": "jinja-html"
 		},
-		"jupyter.jupyterServerType": "local"
+		"jupyter.jupyterServerType": "local",
+		"cSpell.enabled": false,
+		"editor.formatOnSave": true,
+		"eslint.format.enable": true
 	}
 }

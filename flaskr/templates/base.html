@@ -38,13 +38,17 @@
                     <a class="nav-link" href="/">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/classifier">Classifier</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/about">About</a>
+                    <a class="nav-link" href="/information">Information</a>
                 </li>
             </ul>
         </div>
+        <ul class="navbar-nav flex-row d-none d-md-flex">
+            <li class="nav-item">
+                <a href="https:/github.com/nikitaroz/SpamClassifier">
+                    <img src="{{ url_for('static', filename='GitHub-Mark-Light.png') }}" height="25px">
+                </a>
+            </li>
+        </ul>
     </nav>
     {% block content %}
     {% endblock %}

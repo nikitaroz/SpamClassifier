@@ -4,8 +4,29 @@
 
 {% from "macros.html" import message_template with context %}
 <div class="flex-grow-1 m-2 p-0">
-    <div class="m-0 p-2 rounded h-100" id="result">
-        {% for message in response %}
+    <div class="m-0 p-2 rounded h-100" id="features">
+        {% for feature in response["features"] %}
+            <div class="feature-template bg-light p-3 my-3 mx-auto">
+                <div class="p-0 m-0 text-center">
+                    <span>
+                    Stem <b>{{ feature["feature"] }}</b> found in <b>{{ feature["frequency"] }}</b> 
+                    emails and has a coefficient of {{ "%.2f" % feature["coefficient"] }}
+                    <br>
+                    more likely in 
+                    {% if feature["coefficient"] < 0 %}
+                        <b>normal</b>
+                    {% else %}
+                        <b>spam</b>
+                    {% endif %}
+                    emails
+                    </span>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="m-0 p-2 rounded h-100" id="emails">
+        {% for message in response["emails"] %}
             {{ message_template(message) }}
         {% endfor %}
     </div>
@@ -22,7 +43,7 @@
 $(document).scroll(function() {
     if ($(window).scrollTop() + $(window).height() == $(document).height()) {
         var params = (new URL(document.location)).searchParams;
-        $.post("/get_email", {
+        $.post("/search", {
                 normal: params.get("normal"),
                 spam: params.get("spam"),
                 offset: $(".message-template").length,
@@ -30,7 +51,7 @@ $(document).scroll(function() {
                 "search-btn": params.get("search-btn"),
                 "random-btn": params.get("random-btn")
             }, function(response) {
-            $("#result").append(response);
+            $("#emails").append(response);
             colorMarks();
         })
     }
