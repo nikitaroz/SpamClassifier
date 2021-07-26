@@ -10,6 +10,7 @@ bp = Blueprint("main", __name__)
 TOKENIZER = TweetTokenizer()
 STEMMER = SnowballStemmer("english")
 
+MAX_SEARCH_RESULTS = 50
 
 @bp.route("/")
 def main():
@@ -110,10 +111,9 @@ def search():
                     "frequency": row["frequency"]
                 })
 
-        return features
+        return features        
 
     labels = []
-
     if request.method == "GET":
 
         if request.args.get("normal", "off") == "on":
@@ -138,7 +138,7 @@ def search():
             "features": feature_response,
             "emails": email_response,
         }
-        return render_template("search.html", response=response)
+        return render_template("search.html", response=response, max_search_results=MAX_SEARCH_RESULTS)
 
     elif request.method == "POST":
         if request.form.get("normal", "off") == "on":
@@ -151,7 +151,10 @@ def search():
         else:
             search_term = None
 
-        offset = request.form.get("offset", 0)
+        offset = int(request.form.get("offset", 0))
+        if offset >= MAX_SEARCH_RESULTS:
+            return ("", 204)
+
         email_response = fetch_emails(labels,
                                       offset,
                                       3,

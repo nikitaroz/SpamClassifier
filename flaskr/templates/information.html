@@ -1,18 +1,114 @@
 {% extends "base.html" %}
 
 {% block head %}
-    {{ super() }}
-    <script src="https://d3js.org/d3.v6.min.js"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='wordcloud.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='confusion_matrix.js') }}"></script>
+{{ super() }}
+<script src="https://d3js.org/d3.v6.min.js"></script>
 {% endblock %}
 
 
 {% block content %}
-<div class="row" id="body-row">
-    <div class="col py-3">
-        <svg id="wordcloud" style="width: 700px; height: 700px"></svg>
-        <svg id="test-confusion" style="width: 700px; height: 700px"></svg>
+<div class="row mx-auto" id="body-row" style="max-width: 800px;">
+    <div class="col mx-3 py-3">
+        <h1 class="text-center">Spam Classifier</h1>
+        <p class="text-center font-weight-bold">Understand the differences between spam and regular emails.</p>
+        <h2>
+            <span style="display: inline-block;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor"
+                    class="bi bi-archive" viewBox="0 0 16 16">
+                    <path
+                        d="M0 2a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1v7.5a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 1 12.5V5a1 1 0 0 1-1-1V2zm2 3v7.5A1.5 1.5 0 0 0 3.5 14h9a1.5 1.5 0 0 0 1.5-1.5V5H2zm13-3H1v2h14V2zM5 7.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z">
+                    </path>
+                </svg>
+            </span>
+            The Dataset
+        </h2>
+        <p>
+            The data comes from the <a href="https://spamassassin.apache.org/old/publiccorpus">SpamAssassin Dataset</a>.
+            This dataset contains 6047 emails from the early 2000s classified as either
+            <span class="label-badge badge rounded-pill bg-success">Normal</span> or
+            <span class="label-badge badge rounded-pill bg-danger">Spam</span>.
+        </p>
+        <h2>
+            <span style="display: inline-block;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor"
+                    class="bi bi-diagram-3" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd"
+                        d="M6 3.5A1.5 1.5 0 0 1 7.5 2h1A1.5 1.5 0 0 1 10 3.5v1A1.5 1.5 0 0 1 8.5 6v1H14a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-1 0V8h-5v.5a.5.5 0 0 1-1 0V8h-5v.5a.5.5 0 0 1-1 0v-1A.5.5 0 0 1 2 7h5.5V6A1.5 1.5 0 0 1 6 4.5v-1zM8.5 5a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1zM0 11.5A1.5 1.5 0 0 1 1.5 10h1A1.5 1.5 0 0 1 4 11.5v1A1.5 1.5 0 0 1 2.5 14h-1A1.5 1.5 0 0 1 0 12.5v-1zm1.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1zm4.5.5A1.5 1.5 0 0 1 7.5 10h1a1.5 1.5 0 0 1 1.5 1.5v1A1.5 1.5 0 0 1 8.5 14h-1A1.5 1.5 0 0 1 6 12.5v-1zm1.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1zm4.5.5a1.5 1.5 0 0 1 1.5-1.5h1a1.5 1.5 0 0 1 1.5 1.5v1a1.5 1.5 0 0 1-1.5 1.5h-1a1.5 1.5 0 0 1-1.5-1.5v-1zm1.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1z" />
+                </svg>
+            </span>
+            The Classifier
+        </h2>
+        <p>
+            Raw email headers are cleaned and transformed into subject and body text with the help of <a
+                href="https://github.com/SpamScope/mail-parser">mailparser</a>, <a
+                href="https://github.com/LuminosoInsight/python-ftfy">ftfy</a>, and <a
+                href="https://www.crummy.com/software/BeautifulSoup/">BeautifulSoup</a>. The classifier uses word
+            frequencies as well as several additional features such as the presence of capital letters and
+            non-alphabetical characters to classify emails. Email text is tokenized and stemmed using
+            <code>TweetTokenizer</code> and <code>SnowballStemmer</code> in <a href="https://www.nltk.org">NLTK</a>. The
+            classifier only considers the 5,000 most frequent words to keep the number of variables relatively small.
+            For each word,
+            a metric called the <a href="https://scikit-learn.org/stable/modules/feature_extraction.html#tfidf-term-weighting"><em>tf-idf</em></a>
+            is calculated using the <code>TfidfTransformer</code> in 
+            <a href="https://scikit-learn.org">scikit-learn</a>.
+            </p>
+        <div class="text-center mb-3">
+            <img width="100px" class="mx-2" src="{{ url_for('static', filename='scikit-learn.png') }}">
+            <img width="100px" class="mx-2" src="{{ url_for('static', filename='xgboost.png') }}">
+        </div>
+        <p>
+            These features were fed into the <a href="https://xgboost.ai">XGBoost</a> <code>gblinear</code> classifier.
+            The linear classifier, while it may perform worse than the tree one, has model weights that are easy to
+            interpret and understand. The classifier trained on a randomly selected 80% of the dataset and tested on the
+            remaining 20%. The linear model has L1 and L2 regularization terms that were optimized using a 5-fold
+            cross-validated <code>GridSearchCV</code> in scikit-learn.
+        </p>
+        <h2>
+            <span style="display: inline-block;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor"
+                    class="bi bi-bar-chart-steps" viewBox="0 0 16 16">
+                    <path
+                        d="M.5 0a.5.5 0 0 1 .5.5v15a.5.5 0 0 1-1 0V.5A.5.5 0 0 1 .5 0zM2 1.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-4a.5.5 0 0 1-.5-.5v-1zm2 4a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5v-1zm2 4a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-6a.5.5 0 0 1-.5-.5v-1zm2 4a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5v-1z" />
+                </svg>
+
+            </span>
+            The Results
+        </h2>
+        <p class="text-center font-italic mb-0 pb-0">How well does the model perform?</p>
+        <p class="text-center mb-0 pb-0">The confusion matrix below gives us the answer.</p>
+        
+        <div class="text-center">
+            <form>
+                <input type="radio" id="train" name="confusion" value="train">
+                    <label for="train">Training Set</label>
+                <input type="radio" id="test" name="confusion" value="test" checked>
+                    <label for="test">Test Set</label>
+            </form>
+        </div>
+        <svg id="confusion-matrix" viewBox="0 0 400 400"></svg>
+        <p>
+                The model has <b>98.8%</b> training and <b>97.7%</b> testing accuracy. A dummy classifer has a 74% accuracy at predicting email types, which means that the trained model has predictive power.
+        </p>
+        <h2>
+            <span style="display: inline-block;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-gem"
+                    viewBox="0 0 16 16">
+                    <path
+                        d="M3.1.7a.5.5 0 0 1 .4-.2h9a.5.5 0 0 1 .4.2l2.976 3.974c.149.185.156.45.01.644L8.4 15.3a.5.5 0 0 1-.8 0L.1 5.3a.5.5 0 0 1 0-.6l3-4zm11.386 3.785-1.806-2.41-.776 2.413 2.582-.003zm-3.633.004.961-2.989H4.186l.963 2.995 5.704-.006zM5.47 5.495 8 13.366l2.532-7.876-5.062.005zm-1.371-.999-.78-2.422-1.818 2.425 2.598-.003zM1.499 5.5l5.113 6.817-2.192-6.82L1.5 5.5zm7.889 6.817 5.123-6.83-2.928.002-2.195 6.828z" />
+                </svg>
+            </span>
+            The Takeaway
+        </h2>
+        <p class="text-center font-italic mb-0 pb-0">What are the most telling words in spam emails?</p>
+        <p class="text-center mb-0 pb-0">Click the circles below to find out.</p>
+        <svg id="wordcloud" viewBox="0 0 700 700"></svg>
+        The word cloud shows the words with the largest (magnitude) coefficients in the model. The redder the word, the
+        more the model will weigh
+        an email as spam if the word is found in the email. The same goes for green words and normal emails. The size of
+        the bubbles correspond to how often the word appears in the dataset.
     </div>
 </div>
+
+<script type="text/javascript" src="{{ url_for('static', filename='wordcloud.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='confusion_matrix.js') }}"></script>
 {% endblock %}

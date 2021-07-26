@@ -1,10 +1,11 @@
-from os.path import exists
 import re
-import nltk
+from os.path import exists
+
 import ftfy
 import mailparser
-from mailparser.mailparser import MailParser
+import nltk
 from bs4 import BeautifulSoup
+from mailparser.mailparser import MailParser
 from nltk.corpus import stopwords, words
 from nltk.stem import SnowballStemmer
 from nltk.tokenize import TweetTokenizer
@@ -40,7 +41,8 @@ class Message:
 
         self._body = ftfy.fix_text(self._parser.body)
         self._subject = ftfy.fix_text(self._parser.headers.get("Subject", ""))
-        self._normalized_text = self._normalize_text(self.subject + "\n\n" + self.body)
+        self._normalized_text = self._normalize_text(self.subject + "\n\n" +
+                                                     self.body)
         self._tokenizer = TOKENIZER
         self._stemmer = STEMMER
         self._words = WORDS
@@ -86,9 +88,8 @@ class Message:
             features["nonascii_pct"] = num_nonascii / char_len
 
         # finds continuous lines of capital letters
-        caps = re.finditer(
-            r"[A-Z]{2,}.*?(?=(?:\W?[A-Z]?[a-z]|$))", self._normalized_text
-        )
+        caps = re.finditer(r"[A-Z]{2,}.*?(?=(?:\W?[A-Z]?[a-z]|$))",
+                           self._normalized_text)
         cap_lengths = []
         for match in caps:
             cap_lengths.append(len(match.group()))
@@ -132,18 +133,17 @@ class Message:
         for token in self.tokenizer.tokenize(text):
             size = len(token)
             while True:
-                if text[cursor : cursor + size] == token:
+                if text[cursor:cursor + size] == token:
                     stem = self.stemmer.stem(token)
                     if db_connector is not None:
                         result = db_connector.cursor.execute(
                             "SELECT coefficient FROM features WHERE feature == ?",
-                            (stem,),
+                            (stem, ),
                         ).fetchone()
                         if result is not None:
                             coef = result[0]
-                            tokens.append(
-                                f"<mark data-value='{coef:.5}'>" + token + "</mark>"
-                            )
+                            tokens.append(f"<mark data-value='{coef:.5}'>" +
+                                          token + "</mark>")
                         else:
                             tokens.append(token)
                     else:

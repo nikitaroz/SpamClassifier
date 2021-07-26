@@ -6,28 +6,27 @@
 <div class="flex-grow-1 m-2 p-0">
     <div class="m-0 p-2 rounded h-100" id="features">
         {% for feature in response["features"] %}
-            <div class="feature-template bg-light p-3 my-3 mx-auto">
-                <div class="p-0 m-0 text-center">
-                    <span>
-                    Stem <b>{{ feature["feature"] }}</b> found in <b>{{ feature["frequency"] }}</b> 
+        <div class="feature-template bg-light p-3 my-3 mx-auto">
+            <div class="p-0 m-0 text-center">
+                    Stem <b>{{ feature["feature"] }}</b> found in <b>{{ feature["frequency"] }}</b>
                     emails and has a coefficient of {{ "%.2f" % feature["coefficient"] }}
                     <br>
-                    more likely in 
+                    more likely in
                     {% if feature["coefficient"] < 0 %}
-                        <b>normal</b>
+                    <span class="label-badge badge rounded-pill bg-success">Normal</span>
                     {% else %}
-                        <b>spam</b>
+                    <span class="label-badge badge rounded-pill bg-danger">Spam</span>
                     {% endif %}
                     emails
                     </span>
-                </div>
             </div>
+        </div>
         {% endfor %}
     </div>
 
     <div class="m-0 p-2 rounded h-100" id="emails">
         {% for message in response["emails"] %}
-            {{ message_template(message) }}
+        {{ message_template(message) }}
         {% endfor %}
     </div>
 </div>
@@ -39,23 +38,27 @@
     )
 </script>
 
-<script type=text/javascript>
-$(document).scroll(function() {
-    if ($(window).scrollTop() + $(window).height() == $(document).height()) {
-        var params = (new URL(document.location)).searchParams;
-        $.post("/search", {
-                normal: params.get("normal"),
-                spam: params.get("spam"),
-                offset: $(".message-template").length,
-                q: params.get("q"),
-                "search-btn": params.get("search-btn"),
-                "random-btn": params.get("random-btn")
-            }, function(response) {
-            $("#emails").append(response);
-            colorMarks();
-        })
-    }
-})
+<script type=text/javascript> 
+    $(document).scroll(function() { 
+        if ($(window).scrollTop() + $(window).height()==$(document).height()) { 
+            var params=(new URL(document.location)).searchParams; 
+            var offset = $(".message-template").length;
+            if(offset < {{ max_search_results }}) {
+                $.post("/search",
+                    { 
+                        normal: params.get("normal"), 
+                        spam: params.get("spam"), 
+                        offset: $(".message-template").length, 
+                        q: params.get("q"), 
+                        "search-btn" : params.get("search-btn"), 
+                        "random-btn" : params.get("random-btn") 
+                    },
+                function(response) { 
+                    $("#emails").append(response); 
+                    colorMarks(); 
+                })
+            }
+        } 
+    }) 
 </script>
-
 {% endblock %}

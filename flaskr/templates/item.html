@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Message{% endblock %}
-{% block head %} 
-    {{ super() }} 
+{% block head %}
+{{ super() }}
 {% endblock %}
 
 {% block content %}
@@ -18,7 +18,7 @@
 
 <script type="text/javascript" src="{{ url_for('static', filename='color_marks.js') }}"></script>
 <script type="text/javascript">
-    $(document).ready(function() {
+    $(document).ready(function () {
         colorMarks();
     });
 </script>

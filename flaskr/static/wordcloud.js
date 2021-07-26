@@ -3,10 +3,10 @@ $("document").ready(
         function (data) {
             var svg_size = 700;
             var edge_padding = 50;
-            var pack_size = svg_size - 2*edge_padding;
+            var pack_size = svg_size - 2 * edge_padding;
 
             var dataset = { "children": data };
-            
+
             var max_abs_coef = d3.max(data.map(d => Math.abs(d.coefficient)));
             var cScale = d3.scaleSequential(d3.interpolateRdYlGn)
                 .domain([-max_abs_coef, max_abs_coef]);
@@ -51,7 +51,7 @@ $("document").ready(
                 .on("click", function (d) {
                     var isSelected = !d3.select(this.parentNode).classed("selected");
                     prevSelected = d3.select(".selected");
-                    
+
                     svg.selectAll("g").classed("selected", false);
                     if (isSelected) {
                         d3.select(this.parentNode).classed("selected", true);
@@ -88,13 +88,15 @@ $("document").ready(
                             });
                         svg.select(".selected text")
                             .transition()
-                            .attr("font-size", "24")
+                            .attr("font-size", function (d) {
+                                return svg_size / 30;
+                            })
                             .attr("y", "-45");
-                        
+
                         svg.select(".selected")
                             .append("text")
                             .attr("dy", "0em")
-                            .text(function(d) {
+                            .text(function (d) {
                                 return `Found in ${d.data.frequency} emails`;
                             })
                             .classed("expandText", true);
@@ -102,7 +104,7 @@ $("document").ready(
                         svg.select(".selected")
                             .append("text")
                             .attr("dy", "1.2em")
-                            .text(function(d) {
+                            .text(function (d) {
                                 return `Coefficient: ${d.data.coefficient}`
                             })
                             .classed("expandText", true);
@@ -116,18 +118,18 @@ $("document").ready(
                         prevSelected.selectAll(".expandText").remove();
                         prevSelected.selectAll("text")
                             .transition()
-                            .attr("font-size", function(d) {
+                            .attr("font-size", function (d) {
                                 return Math.floor(3 * d.r / (d.data.feature.length));
                             })
                             .attr("y", "0")
-                        
+
                     } else {
                         svg.selectAll("g")
                             .transition()
                             .attr("transform", function (d) {
                                 return "translate(" + (d.x + edge_padding) + "," + (d.y + edge_padding) + ")";
                             });
-                        
+
                         svg.selectAll("circle")
                             .attr("r", function (d) {
                                 if (d3.select(this.parentNode).classed("selected")) {
@@ -146,7 +148,7 @@ $("document").ready(
                     }
                 });
 
-            var text = node.append("text")
+            node.append("text")
                 .text(function (d) {
                     return d.data.feature;
                 })

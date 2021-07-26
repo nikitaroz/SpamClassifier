@@ -1,23 +1,25 @@
 import tarfile
-from urllib.request import urlopen, urlretrieve
-from os import mkdir, listdir
-from os.path import join, exists, isdir
+from os import listdir, mkdir
+from os.path import exists, isdir, join
 from tempfile import gettempdir
+from urllib.request import urlopen, urlretrieve
 
 from bs4 import BeautifulSoup
 
 BASE_DATA_URL = "http://spamassassin.apache.org/old/publiccorpus/"
 
+
 def get_data_urls(base_url=BASE_DATA_URL):
     data_urls = []
     with urlopen(base_url) as response:
-        
+
         soup = BeautifulSoup(response, 'html.parser')
         for anchor in soup.find_all('a'):
             href = anchor.get("href")
             if href.endswith(".bz2"):
                 data_urls.append((href, join(BASE_DATA_URL, href)))
     return data_urls
+
 
 def fetch_data(data_urls, data_dir):
     temp_dir = gettempdir()
@@ -33,6 +35,7 @@ def fetch_data(data_urls, data_dir):
             if not exists(join(data_dir, name)):
                 tar.extract(name, path=data_dir)
         tar.close()
+
 
 def get_labeled_files(data_dir):
     data_files = []
@@ -52,5 +55,5 @@ def get_labeled_files(data_dir):
                 continue
             data_files.append(join(data_folder, data_file))
             class_labels.append(class_label)
-   
+
     return data_files, class_labels
