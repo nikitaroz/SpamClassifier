@@ -54,7 +54,7 @@ $("document").ready(
                 })
                 .on("click", function (d) {
                     var isSelected = !d3.select(this.parentNode).classed("selected");
-                    prevSelected = d3.select(".selected");
+                    prevSelected = svg.select(".selected");
 
                     svg.selectAll("g").classed("selected", false);
                     if (isSelected) {
@@ -62,11 +62,11 @@ $("document").ready(
                     };
 
                     if (isSelected) {
-                        var sel_x = d3.select(".selected circle").datum().x;
-                        var sel_y = d3.select(".selected circle").datum().y;
-                        var sel_r = d3.select(".selected circle").datum().r;
+                        var sel_x = svg.select(".selected circle").datum().x;
+                        var sel_y = svg.select(".selected circle").datum().y;
+                        var sel_r = svg.select(".selected circle").datum().r;
 
-                        d3.selectAll("g")
+                        svg.selectAll("g")
                             .transition()
                             .attr("transform", function (d) {
                                 var dist = Math.sqrt((d.x - sel_x) ** 2 + (d.y - sel_y) ** 2);
