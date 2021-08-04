@@ -2,6 +2,7 @@
 CREATE TABLE IF NOT EXISTS messages (
     message_id INTEGER PRIMARY KEY,
     label TINYINT NOT NULL,
+    dataset VARCHAR(10),
     cap_max INTEGER,
     cap_pct FLOAT,
     num_links INTEGER,
@@ -15,6 +16,7 @@ CREATE TABLE IF NOT EXISTS messages (
 CREATE TABLE IF NOT EXISTS features (
     feature_id INTEGER PRIMARY KEY,
     feature VARCHAR(10) NOT NULL,
+    root VARCHAR(10) NOT NULL,
     coefficient FLOAT NOT NULL,
     frequency INTEGER
 );

@@ -12,6 +12,7 @@ STEMMER = SnowballStemmer("english")
 
 MAX_SEARCH_RESULTS = 50
 
+
 @bp.route("/")
 def main():
     return render_template("main.html")
@@ -21,13 +22,15 @@ def main():
 def get_top_features():
     if request.method == "POST":
         cursor = get_db().cursor()
-        query = "SELECT * FROM features " + "ORDER BY ABS(coefficient) DESC"
+        query = "SELECT * FROM features " + \
+            "WHERE frequency >= 5 " + \
+            "ORDER BY ABS(coefficient) DESC"
         rows = cursor.execute(query).fetchmany(100)
         if rows is None:
             return ("", 204)
 
         results = [{
-            "feature": r["feature"],
+            "root": r["root"],
             "coefficient": r["coefficient"],
             "frequency": r["frequency"],
         } for r in rows]
@@ -111,7 +114,7 @@ def search():
                     "frequency": row["frequency"]
                 })
 
-        return features        
+        return features
 
     labels = []
     if request.method == "GET":
@@ -138,7 +141,9 @@ def search():
             "features": feature_response,
             "emails": email_response,
         }
-        return render_template("search.html", response=response, max_search_results=MAX_SEARCH_RESULTS)
+        return render_template("search.html",
+                               response=response,
+                               max_search_results=MAX_SEARCH_RESULTS)
 
     elif request.method == "POST":
         if request.form.get("normal", "off") == "on":

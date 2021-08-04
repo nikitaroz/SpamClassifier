@@ -21,9 +21,9 @@ except LookupError:
     nltk.download("stopwords")
 
 TOKENIZER = TweetTokenizer()
-
 STEMMER = SnowballStemmer("english")
-WORDS = set(STEMMER.stem(w) for w in words.words())
+WORDS = words.words()
+STEMS = set(STEMMER.stem(w) for w in WORDS)
 STOPWORDS = set(STEMMER.stem(w) for w in stopwords.words("english"))
 
 
@@ -45,7 +45,7 @@ class Message:
                                                      self.body)
         self._tokenizer = TOKENIZER
         self._stemmer = STEMMER
-        self._words = WORDS
+        self._stems = STEMS
         self._stopwords = STOPWORDS
 
     @property
@@ -114,7 +114,7 @@ class Message:
         tokens = self.tokenizer.tokenize(self._normalized_text)
         stems = [self.stemmer.stem(t).lower() for t in tokens]
         filtered_tokens = [
-            t for t in stems if t in self._words and t not in self._stopwords
+            t for t in stems if t in self._stems and t not in self._stopwords
         ]
         return " ".join(filtered_tokens)
 

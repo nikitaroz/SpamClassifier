@@ -10,6 +10,10 @@ $("document").ready(
             var max_abs_coef = d3.max(data.map(d => Math.abs(d.coefficient)));
             var cScale = d3.scaleSequential(d3.interpolateRdYlGn)
                 .domain([-max_abs_coef, max_abs_coef]);
+            var rScale = d3.scaleLinear()
+                .domain([0, 100])
+                .range([0, 100])
+                .clamp(true);
             var bubble = d3.pack(dataset)
                 .size([pack_size, pack_size])
                 .padding(2);
@@ -17,7 +21,7 @@ $("document").ready(
             var svg = d3.select("#wordcloud");
 
             var nodes = d3.hierarchy(dataset)
-                .sum(function (d) { return Math.floor(Math.abs(d.coefficient)); });
+                .sum(function (d) { return Math.floor(rScale(d.frequency)); });
             var node = svg.selectAll("node")
                 .data(bubble(nodes).descendants())
                 .enter()
@@ -89,9 +93,9 @@ $("document").ready(
                         svg.select(".selected text")
                             .transition()
                             .attr("font-size", function (d) {
-                                return svg_size / 30;
+                                return svg_size / 40;
                             })
-                            .attr("y", "-45");
+                            .attr("y", "-20");
 
                         svg.select(".selected")
                             .append("text")
@@ -119,7 +123,7 @@ $("document").ready(
                         prevSelected.selectAll("text")
                             .transition()
                             .attr("font-size", function (d) {
-                                return Math.floor(3 * d.r / (d.data.feature.length));
+                                return Math.floor(3 * d.r / (d.data.root.length));
                             })
                             .attr("y", "0")
 
@@ -142,7 +146,7 @@ $("document").ready(
                         svg.selectAll("text")
                             .transition()
                             .attr("font-size", function (d) {
-                                return Math.floor(3 * d.r / (d.data.feature.length));
+                                return Math.floor(3 * d.r / (d.data.root.length));
                             })
                             .attr("y", "0");
                     }
@@ -150,14 +154,14 @@ $("document").ready(
 
             node.append("text")
                 .text(function (d) {
-                    return d.data.feature;
+                    return d.data.root;
                 })
                 .attr("fill", "black")
                 .style("text-anchor", "middle")
                 .style("alignment-baseline", "middle")
                 .attr("font-family", "sans-serif")
                 .attr("font-size", function (d) {
-                    return Math.floor(3 * d.r / (d.data.feature.length));
+                    return Math.floor(3 * d.r / (d.data.root.length));
                 });
         })
 );
